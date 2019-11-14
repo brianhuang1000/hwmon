@@ -1,12 +1,13 @@
 #include "list_proc.h"
 
-typedef struct {
-  std::string name;
-  unsigned int id;
-} process;
+std::list<process> g_parents; 
 
 int main(int argc, const char** argv) {
-  test_proc("12");
+  process test;
+  test.id = 12;
+  test.info = test_proc("12");
+  g_parents.push_back(test);
+  print_list();
 }
 
 void blop() {
@@ -55,13 +56,29 @@ p_info test_proc(std::string pid) {
       std::string key;
       std::string value;
       is_line >> key;
-      is_line >> value; 
-      std::cout << key << " " << value << "\n";
+      is_line >> value;
+      key.pop_back();
+      values[key] = value;
     }
+    print_info(values);
     return values;
   }
   else {
     p_info bad;
     return bad;
+  } 
+}
+
+void print_list() {
+  std::list<process>::iterator it;
+  for (it = g_parents.begin(); it != g_parents.end(); it++) {
+    std::printf("id: %d, #children: %d\n", it->id, (unsigned int) it->children.size());
   }
+}
+
+void print_info(p_info info) {
+  p_info::iterator it;
+  for (it = info.begin(); it != info.end(); it++) {
+    std::printf("%s:%s\n", it->first.c_str(), it->second.c_str());
+  } 
 }
