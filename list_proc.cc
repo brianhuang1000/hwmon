@@ -1,84 +1,70 @@
-#include "list_proc.h"
+#include "list_proc.hpp"
 
-std::list<process> g_parents; 
+//testing commit
+
+std::list<Process *> g_parents;
+std::map<int, Process> g_proc_map; 
 
 int main(int argc, const char** argv) {
-  process test;
-  test.id = 12;
-  test.info = test_proc("12");
-  g_parents.push_back(test);
-  print_list();
+  populate(1000);
+  print_tree();
+  free_proc_map();
 }
 
-void blop() {
+int populate(int user) {
   DIR *dir;
   struct dirent *ent;
   if ((dir = opendir ("/proc")) != NULL) {
     while ((ent = readdir (dir)) != NULL) {
       std::string name(ent->d_name);
       if(name.find_first_not_of("0123456789") == std::string::npos) {
-        std::ifstream infile;
-        infile.open("/proc/" + name + "/status");
-        if (infile.is_open()){
-          p_info values;
-          std::string line;
-          while (std::getline(infile, line)) {
-            std::istringstream is_line(line);
-            std::string key;
-            std::string value;
-            is_line >> key;
-            is_line >> value;
+        int curid = stoi(name);
+        g_proc_map[curid].create(stoi(name));
+        if (g_proc_map[curid].ppid == 0) {
+          g_parents.push_back(&g_proc_map[stoi(name)]);
+        }
+        else {
+          if (g_proc_map.find(g_proc_map[curid].ppid) == g_proc_map.end()){
+            std::cout << "NO ENTRY" << std::endl;
+          }
+          else {
+            g_proc_map[g_proc_map[curid].ppid].add_child(&(g_proc_map[curid]));
           }
         }
-        std::string part;
-        std::string value;
-        infile >> part;
-        infile >> value;
-        printf("%s, %s\n", part.c_str(), value.c_str());
       }
     }
     closedir (dir);
   } else {
     perror ("");
-    return;
+    return -1;
   }
-  std::cout << "yes\n";
+  return 1;
 }
 
-p_info test_proc(std::string pid) {
-  std::ifstream infile;
-  infile.open("/proc/" + pid + "/status");
-  if (infile.is_open()){
-    p_info values;
-    std::string line;
-    while (std::getline(infile, line)) {
-      std::istringstream is_line(line);
-      std::string key;
-      std::string value;
-      is_line >> key;
-      is_line >> value;
-      key.pop_back();
-      values[key] = value;
-    }
-    print_info(values);
-    return values;
+void free_proc_map() {
+  for (auto it = g_proc_map.cbegin(), next_it = it; it != g_proc_map.cend(); it = next_it) {
+    //free(it->second);
+    ++next_it;
+    g_proc_map.erase(it);
   }
-  else {
-    p_info bad;
-    return bad;
-  } 
+}
+
+
+
+void print_tree() {
+  for (auto it = g_parents.begin(); it != g_parents.end(); it++) {
+    //Print tree;
+    std::cout << (*it)->name << std::endl;
+    // for (auto cld = (*it)->children.begin(); cld != (*it)->children.begin(); cld++) {
+    //   std::cout << "inside\t" << (*cld)->name << std::endl;
+    // }
+    (*(*it)).print_children(1);
+  }
 }
 
 void print_list() {
-  std::list<process>::iterator it;
+  std::list<Process *>::iterator it;
   for (it = g_parents.begin(); it != g_parents.end(); it++) {
-    std::printf("id: %d, #children: %d\n", it->id, (unsigned int) it->children.size());
+    std::printf("id: %d\n", (*it)->pid);
   }
-}
-
-void print_info(p_info info) {
-  p_info::iterator it;
-  for (it = info.begin(); it != info.end(); it++) {
-    std::printf("%s:%s\n", it->first.c_str(), it->second.c_str());
-  } 
 }
