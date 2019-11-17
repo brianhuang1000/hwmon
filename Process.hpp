@@ -19,7 +19,7 @@ class Process {
     void create(int);
     Process *parent;
     std::list<Process *> children;
-    void print_children(int tabs);
+    void print_children(int tabs, int user = 0);
     //void set_parent(Process *parent);
     void add_child(Process *child);
 };

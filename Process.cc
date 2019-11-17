@@ -10,22 +10,22 @@ void Process::create(int id) {
   //print_info();
 }
 
-// void Process::set_parent(Process *parent) {
-//   this->parent = parent;
-// }
-
 void Process::add_child(Process *child) {
-  //std::cout << this->name << " pushed back " << child->name << std::endl;
   this->children.push_back(child);
 }
 
-void Process::print_children(int tabs) {
+void Process::print_children(int tabs, int user) {
   for (auto it = this->children.begin(); it != this->children.end(); it++) {
-    for (int i = 0; i < tabs; i++) {
-      std::cout << " ";
+    if((*it)->uid == user || user == 0){
+      for (int i = 0; i < tabs; i++) {
+        std::cout << "-";
+      }
+      std::cout << "|" << (*it)->name << std::endl;
+      (*(*it)).print_children(tabs + 1, user);
     }
-    std::cout << (*it)->name << std::endl;
-    (*(*it)).print_children(tabs+1);
+    else {
+      (*(*it)).print_children(tabs, user);
+    }
   }
 }
 
@@ -58,13 +58,14 @@ bool Process::pop_core() {
         this->ppid = stoi(value);
         got++;
       }
-      else if (!key.compare("UID")) {
+      else if (!key.compare("Uid")) {
         this->uid = stoi(value);
         got++;
       }
     }
   }
   else {
+    std::cout << ":tirpitzthink:" << std::endl;
     return false;
   }
   return true;

@@ -3,14 +3,16 @@
 #include <string>
 #include <list>
 #include <dirent.h>
-#include<sys/dir.h>
+#include <string.h>
+#include <sys/dir.h>
 
 #include "Process.hpp"
 
 void print_list();
-int populate(int user = 0);
-void print_tree();
+int populate();
+void print_tree(int user = 0);
 void free_proc_map();
+int get_uid(const char *name);
 
 struct _tree{
   int id;
