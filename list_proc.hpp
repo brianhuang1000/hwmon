@@ -13,6 +13,7 @@ int populate();
 void print_tree(int user = 0);
 void free_proc_map();
 int get_uid(const char *name);
+std::string string_uid(int uid);
 
 struct _tree{
   int id;

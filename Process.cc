@@ -20,7 +20,7 @@ void Process::print_children(int tabs, int user) {
       for (int i = 0; i < tabs; i++) {
         std::cout << "-";
       }
-      std::cout << "|" << (*it)->name << std::endl;
+      std::cout << "|" << (*it)->name << "\t" << (*it)->state << "\t" << (*it)->pid << "\t" << (*it)->vmrss << std::endl;
       (*(*it)).print_children(tabs + 1, user);
     }
     else {

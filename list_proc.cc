@@ -12,6 +12,7 @@ int main(int argc, const char** argv) {
   }
   int userid = get_uid(argv[1]);
   std::cout << "uid for itsmiki: " << userid << std::endl;
+  std::cout << "string check for itsmiki: " << string_uid(userid) << std::endl;
   populate();
   print_tree(userid);
   free_proc_map();
@@ -45,7 +46,6 @@ int populate() {
 
 void free_proc_map() {
   for (auto it = g_proc_map.cbegin(), next_it = it; it != g_proc_map.cend(); it = next_it) {
-    //free(it->second);
     ++next_it;
     g_proc_map.erase(it);
   }
@@ -53,16 +53,11 @@ void free_proc_map() {
 
 void print_tree(int user) {
   for (auto it = g_parents.begin(); it != g_parents.end(); it++) {
-    //Print tree;
     int big_pp = 0;
     if((*it)->uid == user || user == 0){
       big_pp++;
-      std::cout << (*it)->name << std::endl; 
+      std::cout << (*it)->name << "\t" << (*it)->state << "\t" << (*it)->pid << "\t" << (*it)->vmrss << std::endl; 
     }
-    // for (auto cld = (*it)->children.begin(); cld != (*it)->children.begin(); cld++) {
-    //   std::cout << "inside\t" << (*cld)->name << std::endl;
-    // }
-    //std::cout << "ok\n";
     (*(*it)).print_children(big_pp, user);
   }
 }
@@ -86,4 +81,18 @@ int get_uid(const char *name) {
     }
   }
   return -1;
+}
+
+std::string string_uid(int uid) {
+  FILE *f = fopen("/etc/passwd", "r");
+  char username[62];
+  int retname;
+  if (f != NULL){
+    while (fscanf(f, "%[^:]:x:%d:%*[^\n]\n", username, &retname) != EOF) {
+      if (retname == uid) {
+        return std::string(username);
+      }
+    }
+  }
+  return "error";
 }
