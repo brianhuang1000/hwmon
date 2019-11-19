@@ -56,7 +56,7 @@ void print_tree(int user) {
     int big_pp = 0;
     if((*it)->uid == user || user == 0){
       big_pp++;
-      std::cout << (*it)->name << "\t" << (*it)->state << "\t" << (*it)->pid << "\t" << (*it)->vmrss << std::endl; 
+      std::cout << (*it)->name << "\t" << (*it)->state << "\t" << (*it)->pid << "\t" << ((float)((*it)->vmrss + (*it)->swap) / 1000) << std::endl; 
     }
     (*(*it)).print_children(big_pp, user);
   }

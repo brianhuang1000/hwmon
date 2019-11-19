@@ -1,7 +1,7 @@
 #include "Process.hpp"
 
 void Process::print_info() {
-  printf("id: %d, name: %s, state: %c, ppid: %d, uid: %d, vmrss: %lu\n", pid, name.c_str(), state, ppid, uid, vmrss);
+  printf("id: %d, name: %s, state: %c, ppid: %d, uid: %d, vmrss: %lu, swap: %lu\n", pid, name.c_str(), state, ppid, uid, vmrss, swap);
 }
 
 void Process::create(int id) {
@@ -20,7 +20,7 @@ void Process::print_children(int tabs, int user) {
       for (int i = 0; i < tabs; i++) {
         std::cout << "-";
       }
-      std::cout << "|" << (*it)->name << "\t" << (*it)->state << "\t" << (*it)->pid << "\t" << (*it)->vmrss << std::endl;
+      std::cout << "|" << (*it)->name << "\t" << (*it)->state << "\t" << (*it)->pid << "\t" << ((float)((*it)->vmrss + (*it)->swap) / 1000) << std::endl;
       (*(*it)).print_children(tabs + 1, user);
     }
     else {
@@ -35,7 +35,7 @@ bool Process::pop_core() {
   infile.open("/proc/" + std::to_string(this->pid) + "/status");
   if (infile.is_open()){
     std::string line;
-    while (std::getline(infile, line) && got < 5) {
+    while (std::getline(infile, line) && got < 6) {
       std::istringstream is_line(line);
       std::string key;
       std::string value;
@@ -60,6 +60,10 @@ bool Process::pop_core() {
       }
       else if (!key.compare("Uid")) {
         this->uid = stoi(value);
+        got++;
+      }
+      else if (!key.compare("VmSwap")) {
+        this->swap = stoi(value);
         got++;
       }
     }

@@ -11,6 +11,7 @@ class Process {
   public:
     int pid;
     unsigned long vmrss;
+    unsigned long swap;
     std::string name;
     char state;
     int ppid;
