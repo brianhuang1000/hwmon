@@ -16,7 +16,7 @@ float get_cpu(std::string pid);
 
 
 int main(int argc, const char** argv) {
-  std::cout << "pew pew \n" << get_cpu("3101") << std::endl;
+  std::cout << "pew pew \n" << get_cpu("3128") << std::endl;
 }
 
 void horahora() {
