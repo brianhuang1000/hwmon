@@ -1,14 +1,17 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <string.h>
 
 // format strings for cpu /proc/stat cpu usage lines
 
 #define CPU_LINE_FMT "cpu %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld"
 #define CORE_LINE_FMT "cpu%d %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld"
-#define PROCSTAT_LINE_LEN 256
+#define PROC_LINE_LEN 256
 
 std::vector<std::vector<long>> prev_cpu_usage;
+
+// CPU USAGE
 
 enum Mode {
     usr_mode,
@@ -30,12 +33,12 @@ bool init_cpu_monitor() {
         return false;
     }
 
-    char line[PROCSTAT_LINE_LEN];
+    char line[PROC_LINE_LEN];
     std::vector<long> stats(10, 0L);
 
     // get total cpu usage
 
-    procstat.getline(line, PROCSTAT_LINE_LEN);
+    procstat.getline(line, PROC_LINE_LEN);
     sscanf(line, CPU_LINE_FMT,
         &stats.at(usr_mode),
         &stats.at(nice_mode),
@@ -50,7 +53,7 @@ bool init_cpu_monitor() {
     );
     prev_cpu_usage.push_back(stats);
 
-    procstat.getline(line, PROCSTAT_LINE_LEN);
+    procstat.getline(line, PROC_LINE_LEN);
 
     while (!procstat.fail()) {
         int core_num = 0;
@@ -68,7 +71,7 @@ bool init_cpu_monitor() {
             &stats.at(guest_nice_mode)
         );
         prev_cpu_usage.push_back(stats);
-        procstat.getline(line, PROCSTAT_LINE_LEN);
+        procstat.getline(line, PROC_LINE_LEN);
     }
 
     procstat.close();
@@ -82,13 +85,13 @@ std::vector<float> get_cpu_usage() {
         return std::vector<float>(0);
     }
 
-    char line[PROCSTAT_LINE_LEN];
+    char line[PROC_LINE_LEN];
     std::vector<long> stats(10, 0L);
     std::vector<std::vector<long>> cur_cpu_usage;
 
     // get total cpu usage
 
-    procstat.getline(line, PROCSTAT_LINE_LEN);
+    procstat.getline(line, PROC_LINE_LEN);
     sscanf(line, CPU_LINE_FMT,
         &stats.at(usr_mode),
         &stats.at(nice_mode),
@@ -103,7 +106,7 @@ std::vector<float> get_cpu_usage() {
     );
     cur_cpu_usage.push_back(stats);
 
-    procstat.getline(line, PROCSTAT_LINE_LEN);
+    procstat.getline(line, PROC_LINE_LEN);
 
     while (!procstat.fail()) {
         int core_num = 0;
@@ -121,7 +124,7 @@ std::vector<float> get_cpu_usage() {
             &stats.at(guest_nice_mode)
         );
         cur_cpu_usage.push_back(stats);
-        procstat.getline(line, PROCSTAT_LINE_LEN);
+        procstat.getline(line, PROC_LINE_LEN);
     }
 
     procstat.close();
@@ -147,10 +150,6 @@ std::vector<float> get_cpu_usage() {
     return out;
 }
 
-/*std::vector<float> get_cpu_usage() {
-    return std::vector<float>(1,1);
-}*/
-
 void print_cpu_stats(std::vector<std::vector<long>> stats) {
     std::cout << "========== CPU USAGE STATS ==========" << '\n';
     for(unsigned long i = 0; i < stats.size(); i++) {
@@ -169,6 +168,69 @@ void print_cpu_stats(std::vector<std::vector<long>> stats) {
 void print_prev_cpu_stats() {
     print_cpu_stats(prev_cpu_usage);
 }
+
+void print_cpu_usage(std::vector<float> usage) {
+    std::cout << "========== CPU USAGE  ==========" << '\n';
+    for(unsigned long i = 0; i < usage.size(); i++) {
+        std::cout << (i == 0 ? "Total " : "Core ");
+        if (i != 0) {
+            std::cout << i;
+        }
+        std::cout << ": " << usage.at(i) * 100 << "%\n";
+    }
+    std::cout << "================================" << '\n';
+}
+
+// MEMORY & SWAP USAGE
+
+std::vector<unsigned long> get_mem_usage() {
+    std::ifstream meminfo;
+    std::vector<unsigned long> out(4);
+    meminfo.open("/proc/meminfo");
+    if (!meminfo) {
+        return std::vector<unsigned long>(0);
+    }
+
+    char line[PROC_LINE_LEN];
+    do {
+        meminfo.getline(line, PROC_LINE_LEN);
+        if (meminfo.fail()) {
+            std::cout << "fail" << '\n';
+            break;
+        }
+        if (strncmp(line, "MemTotal", 8) == 0) {
+            sscanf(line, "MemTotal: %lu", &out.at(1));
+        }
+        else if (strncmp(line, "MemFree", 7) == 0) {
+            sscanf(line, "MemFree: %lu", &out.at(0));
+        }
+        else if (strncmp(line, "SwapTotal", 9) == 0) {
+            sscanf(line, "SwapTotal: %lu", &out.at(3));
+        }
+        else if (strncmp(line, "SwapFree", 8) == 0) {
+            sscanf(line, "SwapFree: %lu", &out.at(2));
+        }
+    } while (strncmp(line, "SwapFree", 8) != 0);
+    return out;
+}
+
+void print_mem_usage(std::vector<unsigned long> usage) {
+    if(usage.size() != 4) {
+        std::cout << "Invalid memory stats size: " << usage.size() << '\n';
+        return;
+    }
+
+    std::cout << "========== MEMORY USAGE ==========" << '\n';
+    std::cout << "Memory used: " << usage.at(0) << '/' << usage.at(1) << " kB (" << (double)usage.at(0)/usage.at(1)*100 << "%)" << '\n';
+    std::cout << "Swap used: " << usage.at(2) << '/' << usage.at(3) << " kB (" << (double)usage.at(2)/usage.at(3)*100 << "%)" << '\n';
+    std::cout << "==================================" << '\n';
+}
+
+// NETWORK USAGE
+
+
+
+// INIT
 
 bool init_resource_monitor() {
     bool cpu = init_cpu_monitor();

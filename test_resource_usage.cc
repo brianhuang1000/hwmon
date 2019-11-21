@@ -7,14 +7,13 @@
 
 int main() {
     init_resource_monitor();
-    //print_prev_cpu_stats();
     while(true) {
         sleep(SLEEP_TIME);
-        std::vector<float> usage = get_cpu_usage();
-        //std::cout << usage.size();
-        for(unsigned long i = 0; i < usage.size(); i++) {
-            std::cout << usage.at(i) << ' ';
-        }
+        std::vector<float> cpu_usage = get_cpu_usage();
+        std::vector<unsigned long> mem_usage = get_mem_usage();
+        
+        print_cpu_usage(cpu_usage);
+        print_mem_usage(mem_usage);
         std::cout << '\n';
     }
 }
