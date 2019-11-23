@@ -4,8 +4,9 @@ void Process::print_info() {
   printf("id: %d, name: %s, state: %c, ppid: %d, uid: %d, vmrss: %lu, swap: %lu\n", pid, name.c_str(), state, ppid, uid, vmrss, swap);
 }
 
-void Process::create(int id) {
+Process::Process(int id) {
   this->pid = id;
+  p_init();
   pop_core();
   //print_info();
 }
@@ -20,7 +21,8 @@ void Process::print_children(int tabs, int user) {
       for (int i = 0; i < tabs; i++) {
         std::cout << "-";
       }
-      std::cout << "|" << (*it)->name << "\t" << (*it)->state << "\t" << (*it)->pid << "\t" << ((float)((*it)->vmrss + (*it)->swap) / 1000) << std::endl;
+      std::cout << "|" << (*it)->name << "\t" << (*it)->state << "\t" << (*it)->pid << "\t" << std::flush;
+      std::cout << ((float)((*it)->vmrss + (*it)->swap) / 1000) << "\tcpu: " << (*it)->cpu_precent << std::endl;
       (*(*it)).print_children(tabs + 1, user);
     }
     else {
@@ -43,7 +45,7 @@ bool Process::pop_core() {
       is_line >> value;
       key.pop_back();
       if (!key.compare("VmRSS")) {
-        this->vmrss = std::stoul(value);
+        this->vmrss = std::stoul(value, 0);
         got++;
       }
       else if (!key.compare("Name")) {
@@ -73,4 +75,49 @@ bool Process::pop_core() {
     return false;
   }
   return true;
+}
+
+bool Process::update() {
+  int got = 0;
+  std::ifstream infile;
+  infile.open("/proc/" + std::to_string(this->pid) + "/status");
+  if (infile.is_open()){
+    std::string line;
+    while (std::getline(infile, line) && got < 3) {
+      std::istringstream is_line(line);
+      std::string key;
+      std::string value;
+      is_line >> key;
+      is_line >> value;
+      key.pop_back();
+      if (!key.compare("VmRSS")) {
+        this->vmrss = std::stoul(value, 0);
+        got++;
+      }
+      else if (!key.compare("State")) {
+        this->state = value.front();
+        got++;
+      }
+      else if (!key.compare("VmSwap")) {
+        this->swap = stoi(value);
+        got++;
+      }
+    }
+    return false;
+  }
+  else {
+    return true;
+  }
+}
+
+void Process::p_init() {
+  cpu_begin = 0;
+  cpu_end = 0;
+  cpu_precent = 0;
+  vmrss = 0;
+  swap = 0;
+  name = "err";
+  state = 'e';
+  ppid = 0;
+  uid = 0;
 }

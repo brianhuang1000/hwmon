@@ -1,9 +1,12 @@
 #include "list_proc.hpp"
 
+
+#include <thread>
+
 // TODO: safe opening errors
 
 std::list<Process *> g_parents;
-std::map<int, Process> g_proc_map; 
+std::map<int, Process *> g_proc_map; 
 
 int main(int argc, const char** argv) {
   if (argc != 2){
@@ -11,9 +14,10 @@ int main(int argc, const char** argv) {
     return -1;
   }
   int userid = get_uid(argv[1]);
-  std::cout << "uid for itsmiki: " << userid << std::endl;
-  std::cout << "string check for itsmiki: " << string_uid(userid) << std::endl;
   populate();
+  set_parents();
+  get_cpu(get_nprocs_conf());
+  update();
   print_tree(userid);
   free_proc_map();
 }
@@ -26,14 +30,11 @@ int populate() {
       std::string name(ent->d_name);
       if(name.find_first_not_of("0123456789") == std::string::npos) {
         int curid = stoi(name);
-        g_proc_map[curid].create(stoi(name));
-        if (g_proc_map[curid].ppid == 0) {
-          g_parents.push_back(&g_proc_map[stoi(name)]);
+        Process *temp = new Process(curid);
+        g_proc_map.insert({curid, temp});
+        if (temp->ppid == 0) {
+          g_parents.push_back(temp);
         }
-        if (g_proc_map[curid].ppid != 0 && g_proc_map.find(g_proc_map[curid].ppid) == g_proc_map.end()){
-          std::cout << "NO ENTRY " << g_proc_map[curid].name << "parent: " << g_proc_map[curid].ppid << std::endl;
-        }
-        g_proc_map[g_proc_map[curid].ppid].add_child(&(g_proc_map[curid]));
       }
     }
     closedir (dir);
@@ -44,9 +45,24 @@ int populate() {
   return 1;
 }
 
+bool set_parents() {
+  for (auto it = g_proc_map.begin(); it != g_proc_map.end(); it++) {
+    if(it->second->ppid != 0) {
+      if (g_proc_map.count(it->second->ppid) == 0) {
+        std::cout << "ERROR: " << it->second->ppid << " NOT FOUND\n";
+      }
+      else {
+        g_proc_map[it->second->ppid]->add_child((it->second));
+      }
+    }
+  }
+  return true;
+}
+
 void free_proc_map() {
   for (auto it = g_proc_map.cbegin(), next_it = it; it != g_proc_map.cend(); it = next_it) {
     ++next_it;
+    delete(it->second);
     g_proc_map.erase(it);
   }
 }
@@ -56,7 +72,7 @@ void print_tree(int user) {
     int big_pp = 0;
     if((*it)->uid == user || user == 0){
       big_pp++;
-      std::cout << (*it)->name << "\t" << (*it)->state << "\t" << (*it)->pid << "\t" << ((float)((*it)->vmrss + (*it)->swap) / 1000) << std::endl; 
+      std::cout << (*it)->name << "\t" << (*it)->state << "\t" << (*it)->pid << "\t" << ((float)((*it)->vmrss + (*it)->swap) / 1000) << "\tcpu: " << (*it)->cpu_precent << std::endl; 
     }
     (*(*it)).print_children(big_pp, user);
   }
@@ -95,4 +111,69 @@ std::string string_uid(int uid) {
     }
   }
   return "error";
+}
+
+unsigned long cpu_time() {
+  FILE *f = fopen("/proc/stat", "r");
+  unsigned long cpus[10];
+  fscanf(f,"%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
+          &cpus[0], &cpus[1], &cpus[2], &cpus[3], &cpus[4], &cpus[5], &cpus[6],
+          &cpus[7], &cpus[8], &cpus[9]);
+  unsigned long total = 0;
+  for (int i = 0; i < 10; i++) {
+    std::cout << cpus[i] << " ";
+    total += cpus[i];
+  }
+  std::cout << std::endl;
+  std::cout << "global cpu: " << total << std::endl;
+  fclose(f);
+  return total;
+}
+
+unsigned long pid_time(std::string pid) {
+  FILE *f = fopen(("/proc/" + pid + "/stat").c_str(), "r");
+  if (f != NULL) {
+    unsigned long utime = 0;
+    unsigned long stime = 0;
+    unsigned long cutime = 0;
+    unsigned long cstime = 0;
+    fscanf(f,"%*d %*[^)] %*c %*c %*d %*d %*d %*d %*d %*d %*d "
+            "%*d %*d %*d %lu %lu %lu %lu", &utime, &stime, &cutime, &cstime);
+    return utime + stime + cutime + cstime;
+  }
+  return 0;
+}
+
+int get_cpu(int p_count) {
+  for (auto it = g_proc_map.begin(); it != g_proc_map.end(); it++) {
+    it->second->cpu_begin = pid_time(std::to_string(it->second->pid));
+  }
+  unsigned long cpu_start = cpu_time();
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  unsigned long cpu_end = cpu_time();
+  for (auto it = g_proc_map.begin(); it != g_proc_map.end(); it++) {
+    it->second->cpu_end = pid_time(std::to_string(it->second->pid));
+  }
+  unsigned long cpu_diff = cpu_end - cpu_start;
+  for (auto it = g_proc_map.begin(); it != g_proc_map.end(); it++) {
+    it->second->cpu_precent = ((float)100 * (it->second->cpu_end - it->second->cpu_begin) / cpu_diff) * p_count;
+  }
+  return 0;
+}
+
+void remove(int pid) {
+  for (auto it = g_proc_map[pid]->children.begin(); it != g_proc_map[pid]->children.end(); it++) {
+    remove((*it)->pid);
+  }
+  delete(g_proc_map[pid]);
+  g_proc_map.erase(g_proc_map.find(pid));
+}
+
+void update() {
+  for (auto it = g_proc_map.begin(); it != g_proc_map.end(); it++) {
+    if (it->second->update()) {
+      remove(it->second->pid);
+    }
+  }
+  get_cpu(get_nprocs_conf());
 }

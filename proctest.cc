@@ -16,12 +16,14 @@ float get_cpu(std::string pid);
 
 
 int main(int argc, const char** argv) {
-  std::cout << "pew pew \n" << get_cpu("3128") << std::endl;
+  while (true) {
+    std::cout << get_cpu("2229") << std::endl;
+  }
 }
 
 void horahora() {
   auto start = std::chrono::high_resolution_clock::now();
-  FILE *f = fopen("/proc/2184/stat", "r");
+  FILE *f = fopen("/proc/2229/stat", "r");
   int pid;
   char *filename = (char *)malloc(255);
   char state;
@@ -49,11 +51,11 @@ unsigned long cpu_time(){
           &cpus[7], &cpus[8], &cpus[9]);
   unsigned long total = 0;
   for (int i = 0; i < 10; i++) {
-    std::cout << cpus[i] << " ";
+    //std::cout << cpus[i] << " ";
     total += cpus[i];
   }
-  std::cout << std::endl;
-  std::cout << "global cpu: " << total << std::endl;
+  //std::cout << std::endl;
+  //std::cout << "global cpu: " << total << std::endl;
   fclose(f);
   return total;
 }
@@ -68,13 +70,13 @@ float get_cpu(std::string pid) {
           "%*d %*d %*d %lu %lu %lu %lu", &utime, &stime, &cutime, &cstime);
   unsigned long process_total = utime + stime + cutime + cstime;
   unsigned long start_cpu = cpu_time();
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  std::this_thread::sleep_for(std::chrono::milliseconds(3000));
   rewind(f);
   fscanf(f,"%*d %*[^)] %*c %*c %*d %*d %*d %*d %*d %*d %*d "
           "%*d %*d %*d %lu %lu %lu %lu", &utime, &stime, &cutime, &cstime);
   unsigned long process_after = utime + stime + cutime + cstime;
   unsigned long end_cpu = cpu_time();
-  std::cout << process_after << " " << process_total << std::endl;
+  //std::cout << process_after << " " << process_total << std::endl;
   fclose(f);
-  return ((float)100 * (process_after-process_total)/(end_cpu-start_cpu));
+  return ((float)100 * 8 * (process_after-process_total)/(end_cpu-start_cpu));
 }
