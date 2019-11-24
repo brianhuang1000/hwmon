@@ -55,12 +55,13 @@ std::list<mem_read> mem_map(int pid) {
   else {
     std::cout << "does not work\n";
   }
+  infile.close();
   return ret;
 }
 
 void print_list(std::list<mem_read> arteam) {
   int number = 0;
-  for (auto it = wish90.begin(); it!= wish90.end(); it++) {
+  for (auto it = arteam.begin(); it!= arteam.end(); it++) {
     if (it->path == "") {
       std::cout << "n/a";
     }
