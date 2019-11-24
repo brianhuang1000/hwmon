@@ -63,7 +63,7 @@ bool init_cpu_monitor() {
 
     procstat.getline(line, PROC_LINE_LEN);
 
-    while (!procstat.fail()) {
+    while (!procstat.fail() && strncmp(line, "cpu", 3) == 0) {
         int core_num = 0;
         sscanf(line, CORE_LINE_FMT,
             &core_num,
@@ -116,7 +116,7 @@ std::vector<float> get_cpu_usage() {
 
     procstat.getline(line, PROC_LINE_LEN);
 
-    while (!procstat.fail()) {
+    while (!procstat.fail() && strncmp(line, "cpu", 3) == 0) {
         int core_num = 0;
         sscanf(line, CORE_LINE_FMT,
             &core_num,
@@ -334,11 +334,9 @@ void print_net_usage(std::vector<double> usage) {
 bool init_resource_monitor() {
     bool cpu = init_cpu_monitor();
 
-    // TODO memory
-    bool mem = true;
+    // we don't need to initialize anything for memory
 
-    // TODO network
     bool net = init_network_monitor();
 
-    return cpu && mem && net;
+    return cpu && net;
 }
