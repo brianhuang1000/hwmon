@@ -82,7 +82,7 @@ void free_list(std::list<mem_read *> wish90) {
 }
 
 int main(int argc, const char** argv) {
-  std::list<mem_read> wish90 = mem_map(9896);
+  std::list<mem_read> wish90 = mem_map(3254);
   print_list(wish90);
   //free_list(wish90);
 }
