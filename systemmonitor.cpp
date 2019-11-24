@@ -1,5 +1,4 @@
 #include "systemmonitor.h"
-//#include "list_proc.hpp"
 #include "ui_systemmonitor.h"
 #include "files.h"
 #include "memorymap.h"
@@ -11,10 +10,12 @@
 #include <QApplication>
 #include <sys/utsname.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #define MAX_STR (1024)
 
 extern std::list<Process *> g_parents;
+extern int populate();
 extern void files_label(QString name, QString pid);
 extern void files_files();
 extern void mm_label(QString name, QString pid);
@@ -76,18 +77,29 @@ void add_process(QTreeWidgetItem *parent, Process *proc){
     QTreeWidgetItem *process_item = new QTreeWidgetItem();
     process_item->setText(0, QString::fromStdString(proc->name));
 
+
     switch (proc->state) {
-    case 'S': process_item->setText(1, "Sleeping");
+    case 'S':
+        process_item->setText(1, "Sleeping");
         break;
-    case 'R': process_item->setText(1, "Running");
+    case 'R':
+        process_item->setText(1, "Running");
         break;
-    case 'D': process_item->setText(1, "Disk Sleep");
+    case 'D':
+        process_item->setText(1, "Disk Sleep");
         break;
-    case 'T': process_item->setText(1, "Stopped");
+    case 'T':
+        process_item->setText(1, "Stopped");
         break;
-    case 'X': process_item->setText(1, "Dead");
+    case 'X':
+        process_item->setText(1, "Dead");
         break;
-    default: process_item->setText(1, "idk");
+    case 'I':
+        process_item->setText(1, "Idle");
+        break;
+    default:
+        std::string s(1, proc->state);
+        process_item->setText(1, QString::fromStdString(s));
     }
     process_item->setText(2, QString::number(proc->cpu));
     process_item->setText(3, QString::number(proc->ppid));
@@ -107,6 +119,7 @@ void add_process(QTreeWidgetItem *parent, Process *proc){
 }
 
 void populate_processes() {
+  populate();
   std::list<Process *>::iterator it;
   Process *proc;
   for (it = g_parents.begin(); it != g_parents.end(); it++) {
@@ -177,19 +190,23 @@ void SystemMonitor::on_actionMy_processes_triggered(){
     populate_processes();
 }
 
+pid_t get_pid(QTreeWidgetItem *item){
+    return (pid_t)(item->text(3).toInt());
+}
+
 void SystemMonitor::stop_process(){
-    g_current_item->setText(g_current_col, "stop process");
+    kill(get_pid(g_current_item), SIGSTOP);
 }
 void SystemMonitor::continue_process(){
-    g_current_item->setText(g_current_col, "continue process");
+    kill(get_pid(g_current_item), SIGQUIT);
 }
 
 void SystemMonitor::end_process(){
-    g_current_item->setText(g_current_col, "end process");
+    kill(get_pid(g_current_item), SIGKILL);
 }
 
 void SystemMonitor::kill_process(){
-    g_current_item->setText(g_current_col, "kill process");
+    kill(get_pid(g_current_item), SIGKILL);
 }
 
 void SystemMonitor::memory_m(){
@@ -249,8 +266,8 @@ void SystemMonitor::on_processes_itemClicked(QTreeWidgetItem *item, int column){
     menu->addSeparator();
     menu->addAction(end_p);
     menu->addAction(kill_p);
-    menu->addSeparator();
-    menu->addMenu("Change Priority");
+//    menu->addSeparator();
+//    menu->addMenu("Change Priority");
     menu->addSeparator();
     menu->addAction(memory_m);
     menu->addAction(open_f);
