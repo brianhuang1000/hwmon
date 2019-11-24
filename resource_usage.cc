@@ -2,14 +2,22 @@
 #include <fstream>
 #include <iostream>
 #include <string.h>
+#include <chrono>
 
 // format strings for cpu /proc/stat cpu usage lines
 
 #define CPU_LINE_FMT "cpu %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld"
 #define CORE_LINE_FMT "cpu%d %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld"
+
+// format string for /proc/net/dev lines
+#define NET_LINE_FMT "%*s %lu %*d %*d %*d %*d %*d %*d %*d %lu %*d %*d %*d %*d %*d %*d %*d"
+
+
 #define PROC_LINE_LEN 256
 
 std::vector<std::vector<long>> prev_cpu_usage;
+std::vector<unsigned long> prev_net_usage(2);
+auto prev_network_time = std::chrono::system_clock::now();
 
 // CPU USAGE
 
@@ -228,7 +236,98 @@ void print_mem_usage(std::vector<unsigned long> usage) {
 
 // NETWORK USAGE
 
+bool init_network_monitor() {
+    auto network_time = std::chrono::system_clock::now();
+    prev_network_time = network_time;
+    std::vector<unsigned long> current_net_usage;
+    std::ifstream netdev;
 
+    netdev.open("/proc/net/dev");
+    if(!netdev) {
+        return false;
+    }
+
+    char line[PROC_LINE_LEN];
+    short i = 0;
+    //double bytes_sent = 0;
+    //double bytes_received = 0;
+    unsigned long sent_total = 0, recv_total = 0;
+
+    while(!netdev.fail()) {
+        netdev.getline(line, PROC_LINE_LEN);
+        if(i < 2) {
+            ++i;
+            continue;   //First two lines are column headers
+        }
+        //unsigned long sent, recv;
+        unsigned long sent, recv;
+        sscanf(line, NET_LINE_FMT, &recv, &sent);
+        recv_total += recv;
+        sent_total += sent;
+        //std::cout << "Line: " << line << '\n';
+        //std::cout << "Sent: " << sent << ", Received: " << recv << '\n';
+    }
+    current_net_usage.push_back(sent_total);
+    current_net_usage.push_back(recv_total);
+
+    prev_net_usage = current_net_usage;
+    return true;
+}
+
+std::vector<double> get_network_usage() {
+    std::vector<double> out;
+    std::vector<unsigned long> current_net_usage;
+    std::ifstream netdev;
+
+    netdev.open("/proc/net/dev");
+    if(!netdev) {
+        return std::vector<double>(0);
+    }
+    auto now = std::chrono::system_clock::now();
+    std::chrono::duration<double> seconds = now - prev_network_time;
+    prev_network_time = now;
+
+    char line[PROC_LINE_LEN];
+    short i = 0;
+    
+    unsigned long sent_total = 0, recv_total = 0;
+
+    //std::cout << sent_total << ' ' << recv_total << '\n';
+
+    while(!netdev.fail()) {
+        netdev.getline(line, PROC_LINE_LEN);
+        if(i < 2) {
+            ++i;
+            continue;   //First two lines are column headers
+        }
+        //unsigned long sent, recv;
+        unsigned long sent, recv;
+        sscanf(line, NET_LINE_FMT, &recv, &sent);
+        recv_total += recv;
+        sent_total += sent;
+        //std::cout << "Line: " << line << '\n';
+        //std::cout << "Sent: " << sent << ", Received: " << recv << '\n';
+    }
+    current_net_usage.push_back(sent_total);
+    current_net_usage.push_back(recv_total);
+
+    out.push_back(current_net_usage.at(0) - prev_net_usage.at(0));
+    out.push_back(current_net_usage.at(1) - prev_net_usage.at(1));
+
+    prev_net_usage = current_net_usage;
+
+    out.push_back(seconds.count());
+    //std::cout << seconds.count() << " seconds";
+
+    netdev.close();
+    return out;
+}
+
+void print_net_usage(std::vector<double> usage) {
+    std::cout << "========== NETWORK USAGE ==========" << '\n';
+    std::cout << "Sent " << usage.at(0) << " bytes\nReceived " << usage.at(1) << " bytes\nIn the last " << usage.at(2) << " seconds" << '\n';
+    std::cout << "===================================" << '\n';
+}
 
 // INIT
 
@@ -239,7 +338,7 @@ bool init_resource_monitor() {
     bool mem = true;
 
     // TODO network
-    bool net = true;
+    bool net = init_network_monitor();
 
     return cpu && mem && net;
 }
