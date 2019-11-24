@@ -10,24 +10,13 @@ void Process::create(int id) {
   //print_info();
 }
 
+std::string Process::get_name(){
+    return "this->name";
+}
+
 void Process::add_child(Process *child) {
   this->children.push_back(child);
 }
-
-//void Process::print_children(int tabs, int user) {
-//  for (auto it = this->children.begin(); it != this->children.end(); it++) {
-//    if((*it)->uid == user || user == 0){
-//      for (int i = 0; i < tabs; i++) {
-//        std::cout << "-";
-//      }
-//      std::cout << "|" << (*it)->name << "\t" << (*it)->state << "\t" << (*it)->pid << "\t" << ((float)((*it)->vmrss + (*it)->swap) / 1000) << std::endl;
-//      (*(*it)).print_children(tabs + 1, user);
-//    }
-//    else {
-//      (*(*it)).print_children(tabs, user);
-//    }
-//  }
-//}
 
 bool Process::pop_core() {
   int got = 0;

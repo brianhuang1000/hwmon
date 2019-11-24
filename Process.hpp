@@ -27,6 +27,7 @@ class Process {
     void print_children(int tabs, int user = 0);
     //void set_parent(Process *parent);
     void add_child(Process *child);
+    std::string get_name();
 };
 
 #endif // PROCESS_HPP

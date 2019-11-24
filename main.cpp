@@ -7,13 +7,14 @@
 
 int main(int argc, char *argv[]){
     populate();
-    print_tree();
-    free_proc_map();
-
     QApplication a(argc, argv);
     SystemMonitor w;
     w.show();
     w.setWindowTitle("System Monitor");
+//    print_list();
+//    free_proc_map();
+
+
 
     return a.exec();
 }

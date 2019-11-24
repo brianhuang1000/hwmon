@@ -55,7 +55,7 @@ private slots:
 
     void open_file();
 
-    void properties();
+    void process_prop();
 
 private:
     Ui::SystemMonitor *ui;

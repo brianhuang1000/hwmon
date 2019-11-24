@@ -1,11 +1,26 @@
 #include "systemmonitor.h"
+//#include "list_proc.hpp"
 #include "ui_systemmonitor.h"
+#include "files.h"
+#include "memorymap.h"
+#include "properties.h"
 
 #include <QBoxLayout>
-#include<iostream>
+#include <iostream>
 #include <QAction>
+#include <QApplication>
+#include <sys/utsname.h>
+#include <stdlib.h>
 
 #define MAX_STR (1024)
+
+extern std::list<Process *> g_parents;
+extern void files_label(QString name, QString pid);
+extern void files_files();
+extern void mm_label(QString name, QString pid);
+extern void mm_files();
+extern void p_label(QString name, QString pid);
+extern void p_details(Process *proc);
 
 char g_mode = 'a';
 std::string g_user = "lhandal";
@@ -44,12 +59,15 @@ void add_device(device *dev){
 
 
 void add_process(QTreeWidgetItem *parent, Process *proc){
+    if(!proc){
+        return;
+    }
     bool add = false;
     if(g_mode == 'a'){
         add = true; //all
     } else if (g_mode == 'o' && g_uid == proc ->uid){
         add = true; //owner
-    } else if (g_mode == 'r' && proc->state != 's'){
+    } else if (g_mode == 'r' && proc->state != 'S'){
         add = true; //running
     }
     if (!add){
@@ -59,11 +77,17 @@ void add_process(QTreeWidgetItem *parent, Process *proc){
     process_item->setText(0, QString::fromStdString(proc->name));
 
     switch (proc->state) {
-    case 's': process_item->setText(1, "Sleeping");
+    case 'S': process_item->setText(1, "Sleeping");
         break;
-    case 'r': process_item->setText(1, "Running");
+    case 'R': process_item->setText(1, "Running");
         break;
-    default: process_item->setText(1, "Waiting");
+    case 'D': process_item->setText(1, "Disk Sleep");
+        break;
+    case 'T': process_item->setText(1, "Stopped");
+        break;
+    case 'X': process_item->setText(1, "Dead");
+        break;
+    default: process_item->setText(1, "idk");
     }
     process_item->setText(2, QString::number(proc->cpu));
     process_item->setText(3, QString::number(proc->ppid));
@@ -72,7 +96,7 @@ void add_process(QTreeWidgetItem *parent, Process *proc){
     for(it = proc->children.begin(); it != proc->children.end(); it++){
         add_process(process_item, (*it));
     }
-    if (!parent){
+    if (parent == NULL){
         QTreeWidget * tree = g_ui->processes;
         tree->addTopLevelItem(process_item);
     } else {
@@ -82,48 +106,26 @@ void add_process(QTreeWidgetItem *parent, Process *proc){
 
 }
 
-
-void populate_processes(){
-    int num_processes = 10;
-
-    for (int i = 0; i < num_processes; i++) {
-        Process proc;
-        switch (i%3) {
-        case 1: proc.state = 's';
-            break;
-        case 2: proc.state = 'r';
-            break;
-        default: proc.state = 'w';
-        }
-        proc.pid = i+1;
-        proc.ppid = i+1;
-        proc.cpu = (unsigned int)pow(13,i) % 100;
-        proc.name = "name " + std::to_string(i + 1);
-        if ( i%3 ){
-            proc.uid = g_uid;
-        } else {
-            proc.uid = g_uid * i;
-        }
-        proc.cpu = ((float)1.345 * proc.cpu);
-        proc.vmrss = (int)proc.cpu % 100;
-        proc.swap = 100 - proc.vmrss;
-        if(i % 10 == 7){
-            Process child;
-            child.state = proc.state;
-            child.pid = proc.pid+1;
-            child.ppid = proc.ppid+1;
-            child.cpu = proc.cpu;
-            child.name = proc.name + ".1";
-            child.uid = proc.uid;
-            child.parent = &proc;
-            proc.children.push_back(&child);
-        }
-        add_process(NULL, &proc);
-    }
-
+void populate_processes() {
+  std::list<Process *>::iterator it;
+  Process *proc;
+  for (it = g_parents.begin(); it != g_parents.end(); it++) {
+      (*it)->cpu = 62;
+      proc = (*it);
+     add_process(NULL, proc);
+  }
 }
 
-void add_system_info(std::string info){
+
+void add_system_info(){
+    std::string info = "OS release version\nkernel  version\namount of memory\nprocessor version\ndisk storage, etc";
+    char buff[MAX_STR];
+    struct utsname OS;
+    if(uname(&OS)){
+        exit(-1);
+    }
+    sprintf(buff, "Name: %s\nrelease: %s\nversion: %s\narchitecture: %s\nnode name: %s\n", OS.sysname, OS.release, OS.version, OS.machine, OS.nodename);
+    info = buff;
     g_ui->info->setText(QString::fromStdString(info));
 }
 
@@ -133,12 +135,10 @@ SystemMonitor::SystemMonitor(QWidget *parent)
     ui->setupUi(this);
     ui->menubar->show();
     ui->tabWidget->setTabText(0, "System");
-    add_system_info("OS release version\nkernel version\namount of memory\nprocessor version\ndisk storage, etc");
+    add_system_info();
     ui->tabWidget->setTabText(1, "Processes");
     ui->processes->header()->resizeSection(0, 256);
     populate_processes();
-
-
     ui->tabWidget->setTabText(2, "Resources");
     ui->tabWidget->setTabText(3, "File System");
     device dev;
@@ -193,15 +193,30 @@ void SystemMonitor::kill_process(){
 }
 
 void SystemMonitor::memory_m(){
-    g_current_item->setText(g_current_col, "memory map");
+    MemoryMap mm;
+    mm.setModal(true);
+    mm.setWindowTitle("Memory Maps");
+    mm_label(g_current_item->text(0), g_current_item->text(3));
+    mm_files();
+    mm.exec();
 }
 
 void SystemMonitor::open_file(){
-    g_current_item->setText(g_current_col, "open file");
+    files f;
+    f.setModal(true);
+    f.setWindowTitle("Open Files");
+    files_label(g_current_item->text(0), g_current_item->text(3));
+    files_files();
+    f.exec();
 }
 
-void SystemMonitor::properties(){
-    g_current_item->setText(g_current_col, "properties");
+void SystemMonitor::process_prop(){
+    properties p;
+    p.setModal(true);
+    p.setWindowTitle("Properties");
+    p_label(g_current_item->text(0), g_current_item->text(3));
+    p_details(g_parents.front());
+    p.exec();
 }
 
 
@@ -219,7 +234,7 @@ void SystemMonitor::on_processes_itemClicked(QTreeWidgetItem *item, int column){
     QAction *kill_p  = new QAction("Kill Process", menu);
     QAction *memory_m =  new QAction("Memory Maps", menu);
     QAction *open_f  = new QAction("Open Files", menu);
-    QAction *properties =  new QAction("Memory Maps", menu);
+    QAction *properties =  new QAction("Properties", menu);
 
     connect(stop_p, SIGNAL(triggered()), this, SLOT(stop_process()));
     connect(continue_p, SIGNAL(triggered()), this, SLOT(continue_process()));
@@ -227,7 +242,7 @@ void SystemMonitor::on_processes_itemClicked(QTreeWidgetItem *item, int column){
     connect(kill_p, SIGNAL(triggered()), this, SLOT(kill_process()));
     connect(memory_m, SIGNAL(triggered()), this, SLOT(memory_m()));
     connect(open_f, SIGNAL(triggered()), this, SLOT(open_file()));
-    connect(properties, SIGNAL(triggered()), this, SLOT(properties()));
+    connect(properties, SIGNAL(triggered()), this, SLOT(process_prop()));
 
     menu->addAction(stop_p);
     menu->addAction(continue_p);

@@ -19,15 +19,24 @@ SOURCES += \
     Process.cpp \
     list_proc.cpp \
     main.cpp \
-    systemmonitor.cpp
+    systemmonitor.cpp \
+    files.cpp \
+    memorymap.cpp \
+    properties.cpp
 
 HEADERS += \
     Process.hpp \
     list_proc.hpp \
-    systemmonitor.h
+    systemmonitor.h \
+    files.h \
+    memorymap.h \
+    properties.h
 
 FORMS += \
-    systemmonitor.ui
+    systemmonitor.ui \
+    files.ui \
+    memorymap.ui \
+    properties.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -46,16 +46,17 @@ void print_tree(int user) {
       big_pp++;
       std::cout << (*it)->name << "\t" << (*it)->state << "\t" << (*it)->pid << "\t" << ((float)((*it)->vmrss + (*it)->swap) / 1000) << std::endl;
     }
-    (*(*it)).print_children(big_pp, user);
+//    (*(*it)).print_children(big_pp, user);
   }
 }
 
 void print_list() {
   std::list<Process *>::iterator it;
-  process proc;
+  Process *proc;
   for (it = g_parents.begin(); it != g_parents.end(); it++) {
       (*it)->cpu = 62;
-     add_process(NULL, (*it));
+      proc = (*it);
+     add_process(NULL, proc);
   }
 }
 
