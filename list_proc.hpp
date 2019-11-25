@@ -20,6 +20,8 @@ std::string string_uid(int uid);
 int get_cpu(int p_count);
 bool set_parents();
 void update();
+unsigned long pid_time(std::string pid);
+unsigned long cpu_time();
 
 struct _tree{
   int id;
