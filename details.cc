@@ -200,9 +200,9 @@ proc_prop details(int pid) {
 }
 
 void printdetails(proc_prop details) {
-  std::cout << details.name << " " << details.user << " " << details.status
+  std::cout << details.name << " " << details.id << " " << details.user << " " << details.status
             << " " << details.memory << " " << details.sh_mem << " " << details.cpu << " "
-            << details.uptime << " " << details.started << std::endl;
+            << details.uptime << " " << details.started << " " << details.nice << std::endl;
 }
 
 int main(int argc, const char** argv) {
