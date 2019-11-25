@@ -1,3 +1,7 @@
+#ifndef FILESYSTEM_HPP
+#define FILESYSTEM_HPP
+
+
 #include <vector>
 #include <string>
 
@@ -23,3 +27,6 @@ class FileSystem
 // Filter its output before displaying in UI
 // Otherwise there will be a bunch of file systems that are NaN% full
 std::vector<FileSystem> get_fs_list();
+
+
+#endif // FILESYSTEM_HPP

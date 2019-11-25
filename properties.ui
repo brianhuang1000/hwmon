@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>properties</class>
+ <widget class="QDialog" name="properties">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>670</width>
+    <height>545</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>570</x>
+     <y>510</y>
+     <width>91</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Close</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>331</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Properties of process ....</string>
+   </property>
+  </widget>
+  <widget class="QTableWidget" name="tableWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>30</y>
+     <width>651</width>
+     <height>481</height>
+    </rect>
+   </property>
+   <attribute name="horizontalHeaderDefaultSectionSize">
+    <number>512</number>
+   </attribute>
+   <row>
+    <property name="text">
+     <string>Process Name</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>User</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>Status</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>Memory</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>Virtual Memory</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>Resident Memory</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>Writable Memory</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>Shared Memory</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>X Server Memory</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>CPU</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>CPU Time</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>Started</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>Nice</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>Priority</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>ID</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>Security Context</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>Command Line</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>Waiting Channel</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
+     <string>Control Group</string>
+    </property>
+   </row>
+   <column>
+    <property name="text">
+     <string/>
+    </property>
+   </column>
+   <item row="0" column="0">
+    <property name="text">
+     <string/>
+    </property>
+   </item>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>properties</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>properties</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
