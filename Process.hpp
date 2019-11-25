@@ -11,23 +11,27 @@
 class Process {
   private:
     bool pop_core();
+    void p_init();
   public:
     int pid;
+    int cpu_begin;
+    int cpu_end;
+    float cpu_precent;
     unsigned long vmrss;
     unsigned long swap;
     std::string name;
     char state;
     int ppid;
     int uid;
-    float cpu;
     void print_info();
-    void create(int);
+    Process(int);
     Process *parent;
     std::list<Process *> children;
     void print_children(int tabs, int user = 0);
     //void set_parent(Process *parent);
     void add_child(Process *child);
-    std::string get_name();
+    bool update();
 };
+
 
 #endif // PROCESS_HPP

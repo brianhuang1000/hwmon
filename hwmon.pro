@@ -17,20 +17,24 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     Process.cpp \
+    details.cpp \
     list_proc.cpp \
     main.cpp \
     systemmonitor.cpp \
     files.cpp \
     memorymap.cpp \
-    properties.cpp
+    properties.cpp \
+    FileSystem.cpp
 
 HEADERS += \
     Process.hpp \
+    details.hpp \
     list_proc.hpp \
     systemmonitor.h \
     files.h \
     memorymap.h \
-    properties.h
+    properties.h \
+    FileSystem.hpp
 
 FORMS += \
     systemmonitor.ui \

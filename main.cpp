@@ -6,12 +6,13 @@
 
 
 int main(int argc, char *argv[]){
-    populate();
     QApplication a(argc, argv);
     SystemMonitor w;
     w.show();
     w.setWindowTitle("System Monitor");
-//    print_list();
+//    set_parents();
+//    get_cpu(get_nprocs_conf());
+//    update();
 //    free_proc_map();
 
 

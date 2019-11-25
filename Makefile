@@ -51,18 +51,24 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = Process.cpp \
+		details.cpp \
 		main.cpp \
+		systemmonitor.cpp \
 		files.cpp \
 		memorymap.cpp \
-		properties.cpp moc_systemmonitor.cpp \
+		properties.cpp \
+		FileSystem.cpp moc_systemmonitor.cpp \
 		moc_files.cpp \
 		moc_memorymap.cpp \
 		moc_properties.cpp
 OBJECTS       = Process.o \
+		details.o \
 		main.o \
+		systemmonitor.o \
 		files.o \
 		memorymap.o \
 		properties.o \
+		FileSystem.o \
 		moc_systemmonitor.o \
 		moc_files.o \
 		moc_memorymap.o \
@@ -142,15 +148,20 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		hwmon.pro Process.hpp \
+		details.hpp \
 		list_proc.hpp \
 		systemmonitor.h \
 		files.h \
 		memorymap.h \
-		properties.h Process.cpp \
+		properties.h \
+		FileSystem.hpp Process.cpp \
+		details.cpp \
 		main.cpp \
+		systemmonitor.cpp \
 		files.cpp \
 		memorymap.cpp \
-		properties.cpp
+		properties.cpp \
+		FileSystem.cpp
 QMAKE_TARGET  = hwmon
 DESTDIR       = 
 TARGET        = hwmon
@@ -334,8 +345,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents Process.hpp list_proc.hpp systemmonitor.h files.h memorymap.h properties.h $(DISTDIR)/
-	$(COPY_FILE) --parents Process.cpp main.cpp files.cpp memorymap.cpp properties.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents Process.hpp details.hpp list_proc.hpp systemmonitor.h files.h memorymap.h properties.h FileSystem.hpp $(DISTDIR)/
+	$(COPY_FILE) --parents Process.cpp details.cpp main.cpp systemmonitor.cpp files.cpp memorymap.cpp properties.cpp FileSystem.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents systemmonitor.ui files.ui memorymap.ui properties.ui $(DISTDIR)/
 
 
@@ -426,22 +437,30 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean compiler_ui
 Process.o: Process.cpp Process.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Process.o Process.cpp
 
+details.o: details.cpp details.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o details.o details.cpp
+
 main.o: main.cpp systemmonitor.h \
 		Process.hpp \
 		list_proc.cpp \
-		list_proc.hpp \
-		systemmonitor.cpp \
+		list_proc.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
+
+systemmonitor.o: systemmonitor.cpp systemmonitor.h \
+		Process.hpp \
 		ui_systemmonitor.h \
 		files.h \
 		memorymap.h \
-		properties.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
+		properties.h \
+		details.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o systemmonitor.o systemmonitor.cpp
 
 files.o: files.cpp files.h \
 		ui_files.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o files.o files.cpp
 
 memorymap.o: memorymap.cpp memorymap.h \
+		details.hpp \
 		ui_memorymap.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o memorymap.o memorymap.cpp
 
@@ -449,6 +468,9 @@ properties.o: properties.cpp properties.h \
 		ui_properties.h \
 		Process.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o properties.o properties.cpp
+
+FileSystem.o: FileSystem.cpp FileSystem.hpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o FileSystem.o FileSystem.cpp
 
 moc_systemmonitor.o: moc_systemmonitor.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_systemmonitor.o moc_systemmonitor.cpp

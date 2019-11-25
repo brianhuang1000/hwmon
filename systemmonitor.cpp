@@ -3,6 +3,8 @@
 #include "files.h"
 #include "memorymap.h"
 #include "properties.h"
+#include "details.hpp"
+#include "FileSystem.hpp"
 
 #include <QBoxLayout>
 #include <iostream>
@@ -11,21 +13,27 @@
 #include <sys/utsname.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 #define MAX_STR (1024)
 
 extern std::list<Process *> g_parents;
 extern int populate();
+extern std::vector<FileSystem> get_fs_list();
+extern bool set_parents();
+extern void update();
 extern void files_label(QString name, QString pid);
 extern void files_files();
 extern void mm_label(QString name, QString pid);
-extern void mm_files();
+extern void mm_files(mem_read mem);
+extern std::list<mem_read> mem_map(int pid);
 extern void p_label(QString name, QString pid);
 extern void p_details(Process *proc);
+extern void free_proc_map();
 
 char g_mode = 'a';
-std::string g_user = "lhandal";
-int g_uid = 12345;
+int g_uid;
 Ui::SystemMonitor *g_ui;
 QTreeWidgetItem *g_current_item;
 int g_current_col;
@@ -45,16 +53,19 @@ QString storage_to_str(double size){
     return qstr;
 }
 
-void add_device(device *dev){
+void add_device(FileSystem dev){
+    if(dev.total_blocks == 0){
+        return;
+    }
     QTreeWidget * tree = g_ui->devices;
     QTreeWidgetItem *item = new QTreeWidgetItem();
-    item->setText(0, QString::fromStdString(dev->name));
-    item->setText(1, QString::fromStdString(dev->directory));
-    item->setText(2, QString::fromStdString(dev->type));
-    item->setText(3, storage_to_str(dev->total));
-    item->setText(4, storage_to_str(dev->free));
-    item->setText(5, storage_to_str(dev->available));
-    item->setText(6, storage_to_str(dev->used));
+    item->setText(0, QString::fromStdString(dev.name));
+    item->setText(1, QString::fromStdString(dev.dir));
+    item->setText(2, QString::fromStdString(dev.type));
+    item->setText(3, storage_to_str(dev.total_blocks));
+    item->setText(4, storage_to_str(dev.available_blocks));
+    item->setText(5, storage_to_str(dev.used_blocks));
+    item->setText(6, storage_to_str(dev.free_blocks));
     tree->addTopLevelItem(item);
 }
 
@@ -101,12 +112,14 @@ void add_process(QTreeWidgetItem *parent, Process *proc){
         std::string s(1, proc->state);
         process_item->setText(1, QString::fromStdString(s));
     }
-    process_item->setText(2, QString::number(proc->cpu));
-    process_item->setText(3, QString::number(proc->ppid));
+    process_item->setText(2, QString::number(proc->cpu_precent));
+    process_item->setText(3, QString::number(proc->pid));
     process_item->setText(4, QString::number((proc->vmrss + proc->swap)/1000.00));
-    std::list<Process *>::iterator it;
-    for(it = proc->children.begin(); it != proc->children.end(); it++){
-        add_process(process_item, (*it));
+    if(proc->children.size() > 0){
+        std::list<Process *>::iterator it;
+        for(it = proc->children.begin(); it != proc->children.end(); it++){
+            add_process(process_item, (*it));
+        }
     }
     if (parent == NULL){
         QTreeWidget * tree = g_ui->processes;
@@ -118,15 +131,30 @@ void add_process(QTreeWidgetItem *parent, Process *proc){
 
 }
 
-void populate_processes() {
-  populate();
-  std::list<Process *>::iterator it;
-  Process *proc;
-  for (it = g_parents.begin(); it != g_parents.end(); it++) {
-      (*it)->cpu = 62;
-      proc = (*it);
-     add_process(NULL, proc);
+
+
+void update_screen(){
+    g_ui->processes->clear();
+    std::list<Process *>::iterator it;
+    Process *proc;
+    for (it = g_parents.begin(); it != g_parents.end(); it++) {
+        proc = (*it);
+       add_process(NULL, proc);
+    }
+
+}
+
+void populate_devides() {
+  std::vector<FileSystem> devices = get_fs_list();
+  foreach (auto device, devices) {
+      add_device(device);
   }
+}
+
+
+void populate_processes() {
+  set_parents();
+  update_screen();
 }
 
 
@@ -151,18 +179,12 @@ SystemMonitor::SystemMonitor(QWidget *parent)
     add_system_info();
     ui->tabWidget->setTabText(1, "Processes");
     ui->processes->header()->resizeSection(0, 256);
+    g_uid = getuid();
+    populate();
     populate_processes();
     ui->tabWidget->setTabText(2, "Resources");
     ui->tabWidget->setTabText(3, "File System");
-    device dev;
-    dev.name = "hhhh";
-    dev.directory = "/homes//";
-    dev.type = "fattt";
-    dev.free = 28388;
-    dev.available = 500000;
-    dev.used = 600000;
-    dev.total = dev.free + dev.available + dev.used;
-    add_device(&dev);
+    populate_devides();
 }
 
 SystemMonitor::~SystemMonitor()
@@ -171,23 +193,21 @@ SystemMonitor::~SystemMonitor()
 }
 
 
+
 void SystemMonitor::on_actionActive_processes_triggered(){
     g_mode = 'r';
-    g_ui->processes->clear();
-    populate_processes();
+   update_screen();
 }
 
 void SystemMonitor::on_actionAll_processes_triggered(){
     g_mode = 'a';
-    g_ui->processes->clear();
-    populate_processes();
+    update_screen();
 
 }
 
 void SystemMonitor::on_actionMy_processes_triggered(){
     g_mode = 'o';
-    g_ui->processes->clear();
-    populate_processes();
+    update_screen();
 }
 
 pid_t get_pid(QTreeWidgetItem *item){
@@ -196,17 +216,25 @@ pid_t get_pid(QTreeWidgetItem *item){
 
 void SystemMonitor::stop_process(){
     kill(get_pid(g_current_item), SIGSTOP);
+    update();
+    populate_processes();
 }
 void SystemMonitor::continue_process(){
     kill(get_pid(g_current_item), SIGQUIT);
+    update();
+    populate_processes();
 }
 
 void SystemMonitor::end_process(){
     kill(get_pid(g_current_item), SIGKILL);
+    update();
+    populate_processes();
 }
 
 void SystemMonitor::kill_process(){
     kill(get_pid(g_current_item), SIGKILL);
+    update();
+    populate_processes();
 }
 
 void SystemMonitor::memory_m(){
@@ -214,7 +242,16 @@ void SystemMonitor::memory_m(){
     mm.setModal(true);
     mm.setWindowTitle("Memory Maps");
     mm_label(g_current_item->text(0), g_current_item->text(3));
-    mm_files();
+
+    std::list<mem_read> list = mem_map(get_pid(g_current_item));
+    std::list<mem_read>::iterator it;
+    for(it = list.begin(); it != list.end(); it++){
+        mm_files((*it));
+    }
+    if (list.empty()){
+         mm.setWindowTitle("check pid");
+    }
+
     mm.exec();
 }
 
@@ -266,8 +303,6 @@ void SystemMonitor::on_processes_itemClicked(QTreeWidgetItem *item, int column){
     menu->addSeparator();
     menu->addAction(end_p);
     menu->addAction(kill_p);
-//    menu->addSeparator();
-//    menu->addMenu("Change Priority");
     menu->addSeparator();
     menu->addAction(memory_m);
     menu->addAction(open_f);
