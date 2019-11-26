@@ -1,4 +1,5 @@
 QT       += core gui
+QT       += charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,14 +17,39 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    Process.cpp \
+    details.cpp \
+    list_proc.cpp \
     main.cpp \
-    systemmonitor.cpp
+    systemmonitor.cpp \
+    files.cpp \
+    memorymap.cpp \
+    properties.cpp \
+    FileSystem.cpp \
+    cpugraph.cpp \
+    memorygraph.cpp \
+    networkgraph.cpp \
+    resource_usage.cpp
 
 HEADERS += \
-    systemmonitor.h
+    Process.hpp \
+    details.hpp \
+    list_proc.hpp \
+    systemmonitor.h \
+    files.h \
+    memorymap.h \
+    properties.h \
+    FileSystem.hpp \
+    cpugraph.hpp \
+    memorygraph.hpp \
+    networkgraph.hpp \
+    resource_usage.hpp
 
 FORMS += \
-    systemmonitor.ui
+    systemmonitor.ui \
+    files.ui \
+    memorymap.ui \
+    properties.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

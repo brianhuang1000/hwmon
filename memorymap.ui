@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MemoryMap</class>
+ <widget class="QDialog" name="MemoryMap">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1170</width>
+    <height>483</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>820</x>
+     <y>450</y>
+     <width>341</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Close</set>
+   </property>
+  </widget>
+  <widget class="QTreeWidget" name="treeWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>50</y>
+     <width>1141</width>
+     <height>391</height>
+    </rect>
+   </property>
+   <property name="sortingEnabled">
+    <bool>true</bool>
+   </property>
+   <column>
+    <property name="text">
+     <string>Filename</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>VM Start</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>VM End</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>VM Size</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Flags</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>VM Offset</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Private Clean</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Private Dirty</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Shared Clean</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Shared Dirty</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>10</y>
+     <width>1061</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Memory maps ....</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>MemoryMap</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>MemoryMap</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
