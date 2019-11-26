@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>793</height>
+    <width>1021</width>
+    <height>919</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,12 +19,12 @@
      <rect>
       <x>-1</x>
       <y>20</y>
-      <width>781</width>
-      <height>741</height>
+      <width>1011</width>
+      <height>871</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -53,8 +53,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>771</width>
-        <height>721</height>
+        <width>991</width>
+        <height>831</height>
        </rect>
       </property>
       <property name="sortingEnabled">
@@ -99,8 +99,8 @@
        <rect>
         <x>20</x>
         <y>20</y>
-        <width>751</width>
-        <height>192</height>
+        <width>971</width>
+        <height>261</height>
        </rect>
       </property>
      </widget>
@@ -121,9 +121,9 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>250</y>
-        <width>751</width>
-        <height>192</height>
+        <y>301</y>
+        <width>971</width>
+        <height>261</height>
        </rect>
       </property>
      </widget>
@@ -131,7 +131,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>230</y>
+        <y>280</y>
         <width>181</width>
         <height>16</height>
        </rect>
@@ -144,9 +144,9 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>490</y>
-        <width>751</width>
-        <height>192</height>
+        <y>600</y>
+        <width>961</width>
+        <height>231</height>
        </rect>
       </property>
      </widget>
@@ -154,7 +154,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>470</y>
+        <y>580</y>
         <width>101</width>
         <height>16</height>
        </rect>
@@ -173,8 +173,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>771</width>
-        <height>721</height>
+        <width>991</width>
+        <height>831</height>
        </rect>
       </property>
       <property name="sortingEnabled">
@@ -221,26 +221,13 @@
      </widget>
     </widget>
    </widget>
-   <widget class="QScrollBar" name="verticalScrollBar">
-    <property name="geometry">
-     <rect>
-      <x>780</x>
-      <y>40</y>
-      <width>16</width>
-      <height>721</height>
-     </rect>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Vertical</enum>
-    </property>
-   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1021</width>
      <height>20</height>
     </rect>
    </property>
@@ -279,7 +266,7 @@
    </widget>
    <widget class="QMenu" name="menuFile_System">
     <property name="title">
-     <string>File System</string>
+     <string>Help</string>
     </property>
    </widget>
    <addaction name="menuMonitor"/>

@@ -1,6 +1,7 @@
 #include "systemmonitor.h"
 #include "Process.hpp"
 #include "list_proc.cpp"
+#include "networkgraph.hpp"
 
 #include <QApplication>
 

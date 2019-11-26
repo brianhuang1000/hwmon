@@ -5,6 +5,10 @@
 #include "properties.h"
 #include "details.hpp"
 #include "FileSystem.hpp"
+#include "networkgraph.hpp"
+#include "resource_usage.hpp"
+#include "memorygraph.hpp"
+#include "cpugraph.hpp"
 
 #include <QBoxLayout>
 #include <iostream>
@@ -79,10 +83,16 @@ void add_process(QTreeWidgetItem *parent, Process *proc){
         add = true; //all
     } else if (g_mode == 'o' && g_uid == proc ->uid){
         add = true; //owner
-    } else if (g_mode == 'r' && proc->state != 'S'){
+    } else if (g_mode == 'r' && proc->state == 'R'){
         add = true; //running
     }
     if (!add){
+        if(proc->children.size() > 0){
+            std::list<Process *>::iterator it;
+            for(it = proc->children.begin(); it != proc->children.end(); it++){
+                add_process(NULL, (*it));
+            }
+        }
         return;
     }
     QTreeWidgetItem *process_item = new QTreeWidgetItem();
@@ -170,6 +180,23 @@ void add_system_info(){
     g_ui->info->setText(QString::fromStdString(info));
 }
 
+void set_up_graphs(){
+    CPUGraph *cpu = new CPUGraph();
+    cpu->timer->start(1000);
+    cpu->view->setFixedSize(g_ui->graphicsView->size());
+    cpu->view->setParent(g_ui->graphicsView);
+
+    MemoryGraph *memory = new MemoryGraph();
+    memory->timer->start(1000);
+    memory->view->setFixedSize(g_ui->graphicsView_2->size());
+    memory->view->setParent(g_ui->graphicsView_2);
+
+    NetworkGraph *network = new NetworkGraph();
+    network->timer->start(1000);
+    network->view->setFixedSize(g_ui->graphicsView_3->size());
+    network->view->setParent(g_ui->graphicsView_3);
+}
+
 SystemMonitor::SystemMonitor(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::SystemMonitor){
     g_ui = ui;
@@ -184,6 +211,7 @@ SystemMonitor::SystemMonitor(QWidget *parent)
     populate_processes();
     ui->tabWidget->setTabText(2, "Resources");
     ui->tabWidget->setTabText(3, "File System");
+    set_up_graphs();
     populate_devides();
 }
 

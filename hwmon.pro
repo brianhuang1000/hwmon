@@ -1,4 +1,5 @@
 QT       += core gui
+QT       += charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -24,7 +25,11 @@ SOURCES += \
     files.cpp \
     memorymap.cpp \
     properties.cpp \
-    FileSystem.cpp
+    FileSystem.cpp \
+    cpugraph.cpp \
+    memorygraph.cpp \
+    networkgraph.cpp \
+    resource_usage.cpp
 
 HEADERS += \
     Process.hpp \
@@ -34,7 +39,11 @@ HEADERS += \
     files.h \
     memorymap.h \
     properties.h \
-    FileSystem.hpp
+    FileSystem.hpp \
+    cpugraph.hpp \
+    memorygraph.hpp \
+    networkgraph.hpp \
+    resource_usage.hpp
 
 FORMS += \
     systemmonitor.ui \
