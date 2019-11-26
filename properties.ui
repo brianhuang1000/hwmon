@@ -111,6 +111,11 @@
    </row>
    <row>
     <property name="text">
+     <string>ID</string>
+    </property>
+   </row>
+   <row>
+    <property name="text">
      <string>Started</string>
     </property>
    </row>
@@ -122,11 +127,6 @@
    <row>
     <property name="text">
      <string>Priority</string>
-    </property>
-   </row>
-   <row>
-    <property name="text">
-     <string>ID</string>
     </property>
    </row>
    <row>

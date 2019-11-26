@@ -57,6 +57,8 @@ private slots:
 
     void process_prop();
 
+    void on_actionRefresh_triggered();
+
 private:
     Ui::SystemMonitor *ui;
 };

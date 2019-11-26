@@ -11,12 +11,7 @@ int main(int argc, char *argv[]){
     SystemMonitor w;
     w.show();
     w.setWindowTitle("System Monitor");
-//    set_parents();
-//    get_cpu(get_nprocs_conf());
-//    update();
 //    free_proc_map();
-
-
 
     return a.exec();
 }

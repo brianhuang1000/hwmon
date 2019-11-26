@@ -18,7 +18,7 @@ MemoryGraph::MemoryGraph(QWidget *parent) : QWidget(parent)
     axisYMem->setRange(0,usage.at(1) / 1048576.0);
     axisYMem->setLabelFormat("%.1f GB");
     axisYMem->setTickCount(5);
-    axisYMem->setTitleText("Memory");
+//    axisYMem->setTitleText("Memory");
 
     QValueAxis *axisYSwap = new QValueAxis;
     axisYSwap->setRange(0,usage.at(3) / 1048576.0);

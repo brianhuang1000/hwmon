@@ -6,22 +6,23 @@
 // TODO: safe opening errors
 
 std::list<Process *> g_parents;
-std::map<int, Process *> g_proc_map;
+std::map<int, Process *> g_proc_map; 
 
-//extern void populate_processes();
-//int main(int argc, const char** argv) {
-//  if (argc != 2){
-//    std::cout << "usage: ./proc username\n";
-//    return -1;
-//  }
-//  int userid = get_uid(argv[1]);
-//  populate();
-//  set_parents();
-//  get_cpu(get_nprocs_conf());
-//  update();
-//  print_tree(userid);
-//  free_proc_map();
-//}
+// int main(int argc, const char** argv) {
+//   if (argc != 2){
+//     std::cout << "usage: ./proc username\n";
+//     return -1;
+//   }
+//   int userid = get_uid(argv[1]);
+//   populate();
+//   set_parents();
+//   get_cpu(get_nprocs_conf());
+//   update();
+//   update();
+//   update();
+//   print_tree(userid);
+//   free_proc_map();
+// }
 
 int populate() {
   DIR *dir;
@@ -66,8 +67,26 @@ void free_proc_map() {
     delete(it->second);
     g_proc_map.erase(it);
   }
+  g_parents.clear();
 }
 
+void print_tree(int user) {
+  for (auto it = g_parents.begin(); it != g_parents.end(); it++) {
+    int big_pp = 0;
+    if((*it)->uid == user || user == 0){
+      big_pp++;
+      std::cout << (*it)->name << "\t" << (*it)->state << "\t" << (*it)->pid << "\t" << ((float)((*it)->vmrss + (*it)->swap) / 1000) << "\tcpu: " << (*it)->cpu_precent << std::endl; 
+    }
+    (*(*it)).print_children(big_pp, user);
+  }
+}
+
+void print_list() {
+  std::list<Process *>::iterator it;
+  for (it = g_parents.begin(); it != g_parents.end(); it++) {
+    std::printf("id: %d\n", (*it)->pid);
+  }
+}
 
 int get_uid(const char *name) {
   FILE *f = fopen("/etc/passwd", "r");
@@ -99,18 +118,20 @@ std::string string_uid(int uid) {
 
 unsigned long cpu_time() {
   FILE *f = fopen("/proc/stat", "r");
-  unsigned long cpus[10];
-  fscanf(f,"%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
-          &cpus[0], &cpus[1], &cpus[2], &cpus[3], &cpus[4], &cpus[5], &cpus[6],
-          &cpus[7], &cpus[8], &cpus[9]);
   unsigned long total = 0;
-  for (int i = 0; i < 10; i++) {
-    std::cout << cpus[i] << " ";
-    total += cpus[i];
+  if (f != NULL) {
+    unsigned long cpus[10];
+    fscanf(f,"%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
+            &cpus[0], &cpus[1], &cpus[2], &cpus[3], &cpus[4], &cpus[5], &cpus[6],
+            &cpus[7], &cpus[8], &cpus[9]);
+    for (int i = 0; i < 10; i++) {
+      std::cout << cpus[i] << " ";
+      total += cpus[i];
+    }
+    std::cout << std::endl;
+    std::cout << "global cpu: " << total << std::endl;
+    fclose(f);
   }
-  std::cout << std::endl;
-  std::cout << "global cpu: " << total << std::endl;
-  fclose(f);
   return total;
 }
 
@@ -146,7 +167,9 @@ int get_cpu(int p_count) {
 }
 
 void remove(int pid) {
-  for (auto it = g_proc_map[pid]->children.begin(); it != g_proc_map[pid]->children.end(); it++) {
+  g_proc_map[g_proc_map[pid]->ppid]->children.remove(g_proc_map[pid]);
+  for (auto it = g_proc_map[pid]->children.begin(), next_it = it; it != g_proc_map[pid]->children.end(); it = next_it) {
+    next_it++;
     remove((*it)->pid);
   }
   delete(g_proc_map[pid]);
@@ -154,10 +177,8 @@ void remove(int pid) {
 }
 
 void update() {
-  for (auto it = g_proc_map.begin(); it != g_proc_map.end(); it++) {
-    if (it->second->update()) {
-      remove(it->second->pid);
-    }
-  }
+  free_proc_map();
+  populate();
+  set_parents();
   get_cpu(get_nprocs_conf());
 }

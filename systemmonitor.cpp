@@ -12,6 +12,7 @@
 
 #include <QBoxLayout>
 #include <iostream>
+#include <fstream>
 #include <QAction>
 #include <QApplication>
 #include <sys/utsname.h>
@@ -19,6 +20,8 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/sysinfo.h>
+#include <sys/statvfs.h>
 
 #define MAX_STR (1024)
 
@@ -33,7 +36,7 @@ extern void mm_label(QString name, QString pid);
 extern void mm_files(mem_read mem);
 extern std::list<mem_read> mem_map(int pid);
 extern void p_label(QString name, QString pid);
-extern void p_details(Process *proc);
+extern void p_details(pid_t);
 extern void free_proc_map();
 
 char g_mode = 'a';
@@ -45,12 +48,14 @@ int g_current_col;
 
 QString storage_to_str(double size){
     char buff[1024];
-    if (size < 1024){
-        sprintf(buff, "%.1lf KiB", size);
+    if(size < 1024){
+        sprintf(buff, "%.1lf B", size);
     } else if (size < pow(1024, 2)){
-        sprintf(buff, "%.1lf MiB", size / 1024);
+        sprintf(buff, "%.1lf KiB", size / 1024);
+    } else if (size < pow(1024, 3)){
+        sprintf(buff, "%.1lf MiB", size / pow(1024, 2));
     } else {
-        sprintf(buff, "%.1lf GiB", size / pow(1024, 2));
+        sprintf(buff, "%.1lf GiB", size / pow(1024, 3));
     }
     std::string str = buff;
     QString qstr = QString::fromStdString(str);
@@ -163,21 +168,54 @@ void populate_devides() {
 
 
 void populate_processes() {
-  set_parents();
+//  set_parents();
   update_screen();
 }
 
 
 void add_system_info(){
-    std::string info = "OS release version\nkernel  version\namount of memory\nprocessor version\ndisk storage, etc";
+    QString info;
     char buff[MAX_STR];
     struct utsname OS;
     if(uname(&OS)){
-        exit(-1);
+        info.append("Error retrieving OS data\n");
+    } else {
+        sprintf(buff, "Name: %s\nrelease: %s\nKernel version: %s\n\nTotal RAM:", OS.sysname, OS.release, OS.version);
+        info.append(buff);
+
     }
-    sprintf(buff, "Name: %s\nrelease: %s\nversion: %s\narchitecture: %s\nnode name: %s\n", OS.sysname, OS.release, OS.version, OS.machine, OS.nodename);
-    info = buff;
-    g_ui->info->setText(QString::fromStdString(info));
+    struct sysinfo hardware;
+    if(sysinfo(&hardware)){
+        info.append("Error retrieving total RAM\n");
+    } else {
+        info.append(storage_to_str(hardware.totalram));
+    }
+
+    std::ifstream cpuinfo("/proc/cpuinfo");
+    std::string line;
+    while (!cpuinfo.eof()){
+        std::getline(cpuinfo, line);
+        strcpy(buff, line.c_str());
+        if (!buff || !strlen(buff)){
+            continue;
+        }
+        if (strstr(buff, "model name")){
+            info.append("\nProcessor");
+            info.append(QString::fromStdString(strchr(buff, ':')));
+            info.append("\n");
+            break;
+        }
+    }
+    struct statvfs disk;
+    if(statvfs("/",&disk) < 0){
+        info.append("Error retrieving available storage\n");
+    } else {
+        info.append("Available space disk: ");
+        info.append(storage_to_str(disk.f_bavail * disk.f_blocks));
+    }
+
+
+    g_ui->info->setText(info);
 }
 
 void set_up_graphs(){
@@ -208,9 +246,11 @@ SystemMonitor::SystemMonitor(QWidget *parent)
     ui->processes->header()->resizeSection(0, 256);
     g_uid = getuid();
     populate();
+    set_parents();
     populate_processes();
     ui->tabWidget->setTabText(2, "Resources");
     ui->tabWidget->setTabText(3, "File System");
+    ui->devices->header()->resizeSection(0, 256);
     set_up_graphs();
     populate_devides();
 }
@@ -241,28 +281,28 @@ void SystemMonitor::on_actionMy_processes_triggered(){
 pid_t get_pid(QTreeWidgetItem *item){
     return (pid_t)(item->text(3).toInt());
 }
+void process_update(){
+    update();
+    update_screen();
+}
 
 void SystemMonitor::stop_process(){
     kill(get_pid(g_current_item), SIGSTOP);
-    update();
-    populate_processes();
+    process_update();
 }
 void SystemMonitor::continue_process(){
     kill(get_pid(g_current_item), SIGQUIT);
-    update();
-    populate_processes();
+    process_update();
 }
 
 void SystemMonitor::end_process(){
     kill(get_pid(g_current_item), SIGKILL);
-    update();
-    populate_processes();
+    process_update();
 }
 
 void SystemMonitor::kill_process(){
     kill(get_pid(g_current_item), SIGKILL);
-    update();
-    populate_processes();
+    process_update();
 }
 
 void SystemMonitor::memory_m(){
@@ -297,7 +337,7 @@ void SystemMonitor::process_prop(){
     p.setModal(true);
     p.setWindowTitle("Properties");
     p_label(g_current_item->text(0), g_current_item->text(3));
-    p_details(g_parents.front());
+    p_details(get_pid(g_current_item));
     p.exec();
 }
 
@@ -339,10 +379,16 @@ void SystemMonitor::on_processes_itemClicked(QTreeWidgetItem *item, int column){
 
     QRect rect = item->treeWidget()->visualItemRect(item);
     QPoint pos = rect.bottomLeft();
+    pos = mapToGlobal(pos);
+
     if(column){
         pos.setX(pos.x() + 246 + 100 * (column - 1));
     }
 
-    pos.setY(pos.y() + 110);
+    pos.setY(pos.y() + 74);
     menu->popup(pos, nullptr);
+}
+
+void SystemMonitor::on_actionRefresh_triggered(){
+    process_update();
 }

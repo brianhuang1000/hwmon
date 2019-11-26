@@ -19,7 +19,7 @@ NetworkGraph::NetworkGraph(QWidget *parent) : QWidget(parent){
     axisY->setRange(0, this->y_max); // kB/s
     axisY->setLabelFormat("%.1f kB/s");
     axisY->setTickCount(3);
-    axisY->setTitleText("Network activity");
+//    axisY->setTitleText("Network activity");
 
     this->chart->addAxis(axisX, Qt::AlignBottom);
     this->chart->addAxis(axisY, Qt::AlignLeft);
