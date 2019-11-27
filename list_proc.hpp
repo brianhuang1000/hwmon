@@ -6,10 +6,22 @@
 #include <dirent.h>
 #include <string.h>
 #include <sys/dir.h>
-
+#include <unistd.h>
 #include <sys/sysinfo.h>
 
 #include "Process.hpp"
+
+struct _tree{
+  int id;
+  struct _process *parent;
+  std::list<struct _process *> children;
+};
+
+struct _fds {
+  int number;
+  std::string type;
+  std::string loc;
+} typedef fds;
 
 void print_list();
 int populate();
@@ -22,9 +34,4 @@ bool set_parents();
 void update();
 unsigned long pid_time(std::string pid);
 unsigned long cpu_time();
-
-struct _tree{
-  int id;
-  struct _process *parent;
-  std::list<struct _process *> children;
-};
+std::list<fds> openfiles(int pid);

@@ -8,21 +8,22 @@
 std::list<Process *> g_parents;
 std::map<int, Process *> g_proc_map; 
 
-// int main(int argc, const char** argv) {
-//   if (argc != 2){
-//     std::cout << "usage: ./proc username\n";
-//     return -1;
-//   }
-//   int userid = get_uid(argv[1]);
-//   populate();
-//   set_parents();
-//   get_cpu(get_nprocs_conf());
-//   update();
-//   update();
-//   update();
-//   print_tree(userid);
-//   free_proc_map();
-// }
+int main(int argc, const char** argv) {
+  openfiles(3157);
+  // if (argc != 2){
+  //   std::cout << "usage: ./proc username\n";
+  //   return -1;
+  // }
+  // int userid = get_uid(argv[1]);
+  // populate();
+  // set_parents();
+  // get_cpu(get_nprocs_conf());
+  // update();
+  // update();
+  // update();
+  // print_tree(userid);
+  // free_proc_map();
+}
 
 int populate() {
   DIR *dir;
@@ -174,6 +175,42 @@ void remove(int pid) {
   }
   delete(g_proc_map[pid]);
   g_proc_map.erase(g_proc_map.find(pid));
+}
+
+std::list<fds> openfiles(int pid) {
+  DIR *dir;
+  struct dirent *ent;
+  std::list<fds> out;
+  if ((dir = opendir (("/proc/" + std::to_string(pid) + "/fd").c_str())) != NULL) {
+    while ((ent = readdir (dir)) != NULL) {
+      std::string name(ent->d_name);
+      if(name.find_first_not_of("0123456789") == std::string::npos) {
+        fds temp;
+        int number = std::stoi(name);
+        char dets[64] = "";
+        readlink(("/proc/" + std::to_string(pid) + "/fd/" + name).c_str(),
+                  dets, 64);
+        if (strstr(dets, ":[") != NULL){
+          char *blep = strtok(dets, ":[");
+          char *bloop = strtok(NULL, "");
+          std::string type(blep);
+          std::string loc(bloop);
+          temp.type = type;
+          temp.loc = loc;
+        }
+        else {
+          temp.type = "file";
+          temp.loc = dets;
+        }
+        std::cout << number << ", " << temp.type << ", " << temp.loc << std::endl;
+      }
+    }
+    closedir (dir);
+  } else {
+    std::cout << "error in opening fd directory\n";
+    return out;
+  }
+  return out;
 }
 
 void update() {
