@@ -8,8 +8,11 @@
 #include <sys/dir.h>
 #include <unistd.h>
 #include <sys/sysinfo.h>
+#include <thread>
 
 #include "Process.hpp"
+
+#define CPU_DIFF (1000)
 
 struct _tree{
   int id;
