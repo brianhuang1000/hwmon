@@ -25,8 +25,6 @@ struct _mem_read {
   unsigned int s_dirty;
 } typedef mem_read;
 
-
-//use kibs
 struct _proc_prop {
   std::string name; //name
   std::string user; //uid + user
@@ -37,7 +35,7 @@ struct _proc_prop {
   unsigned long sh_mem; //rss_file + rssshmem
   float cpu; //compute cpu
   std::string uptime; //jiffies / sysconf(_SC_CLK_TCK) 
-  std::string started; //(/status/starttime / sysconf(_SC_CLK_TCK)) + boottime) to date
+  std::string started; //(/status/starttime / sysconf(_SC_CLK_TCK)) + boottime)
   int nice;
   int id;
 }  typedef proc_prop;
