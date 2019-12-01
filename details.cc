@@ -194,9 +194,19 @@ proc_prop details(int pid) {
     infile.close();
     FILE *f = fopen(("/proc/" + std::to_string(pid) + "/stat").c_str(), "r");
     if (f != NULL) {
-      fscanf(f,"%*d %*[^)] %*c %*c %*d %*d %*d %*d %*d %*d %*d "
+      int items = fscanf(f,"%*d %*[^)] %*c %*c %*d %*d %*d %*d %*d %*d %*d "
             "%*d %*d %*d %*d %*d %*d %*d %*d %d %*d %*d %llu",
             &(ret.nice), &start_time);
+      if (items != 2) {
+        std::cout << "details: error reading file\n";
+        ret.cpu = 0;
+        ret.uptime = "0";
+        ret.id = 0;
+        ret.memory = 0;
+        ret.sh_mem = 0;
+        ret.started = 0;
+        return ret;
+      }
       unsigned long procstart = pid_time(std::to_string(pid));
       unsigned long cpu_start = cpu_time();
       std::this_thread::sleep_for(std::chrono::milliseconds(1000));

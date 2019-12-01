@@ -7,22 +7,22 @@ std::map<int, Process *> g_proc_map;
  * Testing main function
  */
 
-// int main(int argc, const char** argv) {
-//   //openfiles(3157);
-//   if (argc != 2){
-//     std::cout << "usage: ./proc username\n";
-//     return -1;
-//   }
-//   int userid = get_uid(argv[1]);
-//   populate();
-//   set_parents();
-//   get_cpu(get_nprocs_conf());
-//   update();
-//   update();
-//   update();
-//   print_tree(userid);
-//   free_proc_map();
-// }
+int main(int argc, const char** argv) {
+  //openfiles(3157);
+  if (argc != 2){
+    std::cout << "usage: ./proc username\n";
+    return -1;
+  }
+  int userid = get_uid(argv[1]);
+  populate();
+  set_parents();
+  get_cpu(get_nprocs_conf());
+  update();
+  update();
+  update();
+  print_tree(userid);
+  free_proc_map();
+}
 
 /*
  * Populates g_proc_map with directories of processes and g_parents list
@@ -158,9 +158,13 @@ unsigned long cpu_time() {
   unsigned long total = 0;
   if (f != NULL) {
     unsigned long cpus[10];
-    fscanf(f,"%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
+    int number = fscanf(f,"%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
             &cpus[0], &cpus[1], &cpus[2], &cpus[3], &cpus[4], &cpus[5],
             &cpus[6], &cpus[7], &cpus[8], &cpus[9]);
+    if (number != 10) {
+      std::cout << "Error: issue opening /proc/stat\n";
+      return 100;
+    }
     for (int i = 0; i < 10; i++) {
       std::cout << cpus[i] << " ";
       total += cpus[i];
@@ -185,8 +189,17 @@ unsigned long pid_time(std::string pid) {
     unsigned long stime = 0;
     unsigned long cutime = 0;
     unsigned long cstime = 0;
-    fscanf(f,"%*d %*[^)] %*c %*c %*d %*d %*d %*d %*d %*d %*d "
+    char junk[255] = " ";
+    while (strstr(junk,")") == NULL) {
+      if(fscanf(f,"%[^ ]%*c",junk) ==  EOF){
+        break;
+      }
+    }
+    int number = fscanf(f,"%*c %*d %*d %*d %*d %*d %*d %*d "
             "%*d %*d %*d %lu %lu %lu %lu", &utime, &stime, &cutime, &cstime);
+    if (number != 4) {
+      std::cout << "Unable to read " << pid << " cpu usage\n";
+    }
     return utime + stime + cutime + cstime;
   } else {
     std::cout << "Error getting process cpu jiffies\n";

@@ -88,7 +88,7 @@ bool Process::pop_core() {
     }
   }
   else {
-    std::cout << ":tirpitzthink:" << std::endl;
+    std::cout << "Unable to open pid folder\n" << std::endl;
     return false;
   }
   return true;

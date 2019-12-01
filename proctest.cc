@@ -2,6 +2,7 @@
 #include <fstream>
 #include <chrono>
 #include <thread>
+#include <string.h>
 
 /* notes
 
@@ -16,9 +17,21 @@ float get_cpu(std::string pid);
 
 
 int main(int argc, const char** argv) {
-  while (true) {
-    std::cout << get_cpu("2229") << std::endl;
+  unsigned long utime;
+  unsigned long stime;
+  unsigned long cutime;
+  unsigned long cstime;
+  FILE *f = fopen(("/proc/1139/stat"), "r");
+  char junk[255] = " ";
+  while (strstr(junk,")") == NULL) {
+    if(fscanf(f,"%[^ ]%*c",junk) ==  EOF){
+      break;
+    };
+    std::cout << junk <<std::endl;
   }
+  int number = fscanf(f,"%*c %*d %*d %*d %*d %*d %*d %*d "
+            "%*d %*d %*d %lu %lu %lu %lu", &utime, &stime, &cutime, &cstime);
+  std::cout<< utime <<" "<<stime<<" "<<cutime<<" "<<cstime << " " << number<<std::endl;
 }
 
 void horahora() {
