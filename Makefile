@@ -13,8 +13,8 @@ MAKEFILE      = Makefile
 CC            = gcc
 CXX           = g++
 DEFINES       = -DQT_DEPRECATED_WARNINGS -DQT_NO_DEBUG -DQT_CHARTS_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
-CFLAGS        = -pipe -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-CXXFLAGS      = -pipe -O2 -std=gnu++11 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
+CFLAGS        = -pipe -O2 -w -D_REENTRANT -fPIC $(DEFINES)
+CXXFLAGS      = -pipe -O2 -std=gnu++11 -w -D_REENTRANT -fPIC $(DEFINES)
 INCPATH       = -I. -isystem /usr/include/x86_64-linux-gnu/qt5 -isystem /usr/include/x86_64-linux-gnu/qt5/QtCharts -isystem /usr/include/x86_64-linux-gnu/qt5/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt5/QtGui -isystem /usr/include/x86_64-linux-gnu/qt5/QtCore -I. -isystem /usr/include/libdrm -I. -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
 QMAKE         = /usr/lib/qt5/bin/qmake
 DEL_FILE      = rm -f
@@ -61,13 +61,15 @@ SOURCES       = Process.cpp \
 		cpugraph.cpp \
 		memorygraph.cpp \
 		networkgraph.cpp \
-		resource_usage.cpp moc_systemmonitor.cpp \
+		resource_usage.cpp \
+		usage.cpp moc_systemmonitor.cpp \
 		moc_files.cpp \
 		moc_memorymap.cpp \
 		moc_properties.cpp \
 		moc_cpugraph.cpp \
 		moc_memorygraph.cpp \
-		moc_networkgraph.cpp
+		moc_networkgraph.cpp \
+		moc_usage.cpp
 OBJECTS       = Process.o \
 		details.o \
 		main.o \
@@ -80,13 +82,15 @@ OBJECTS       = Process.o \
 		memorygraph.o \
 		networkgraph.o \
 		resource_usage.o \
+		usage.o \
 		moc_systemmonitor.o \
 		moc_files.o \
 		moc_memorymap.o \
 		moc_properties.o \
 		moc_cpugraph.o \
 		moc_memorygraph.o \
-		moc_networkgraph.o
+		moc_networkgraph.o \
+		moc_usage.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -152,7 +156,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/resolve_config.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_post.prf \
-		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/warn_on.prf \
+		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/warn_off.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/resources.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/moc.prf \
@@ -176,7 +180,8 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		cpugraph.hpp \
 		memorygraph.hpp \
 		networkgraph.hpp \
-		resource_usage.hpp Process.cpp \
+		resource_usage.hpp \
+		usage.h Process.cpp \
 		details.cpp \
 		main.cpp \
 		systemmonitor.cpp \
@@ -187,7 +192,8 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		cpugraph.cpp \
 		memorygraph.cpp \
 		networkgraph.cpp \
-		resource_usage.cpp
+		resource_usage.cpp \
+		usage.cpp
 QMAKE_TARGET  = hwmon
 DESTDIR       = 
 TARGET        = hwmon
@@ -196,7 +202,7 @@ TARGET        = hwmon
 first: all
 ####### Build rules
 
-$(TARGET): ui_systemmonitor.h ui_files.h ui_memorymap.h ui_properties.h $(OBJECTS)  
+$(TARGET): ui_systemmonitor.h ui_files.h ui_memorymap.h ui_properties.h ui_usage.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: hwmon.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
@@ -264,7 +270,7 @@ Makefile: hwmon.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf /
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/resolve_config.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_post.prf \
-		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/warn_on.prf \
+		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/warn_off.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/resources.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/moc.prf \
@@ -348,7 +354,7 @@ Makefile: hwmon.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf /
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/resolve_config.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_post.prf:
-/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/warn_on.prf:
+/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/warn_off.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/resources.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/moc.prf:
@@ -381,9 +387,9 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents Process.hpp details.hpp list_proc.hpp systemmonitor.h files.h memorymap.h properties.h FileSystem.hpp cpugraph.hpp memorygraph.hpp networkgraph.hpp resource_usage.hpp $(DISTDIR)/
-	$(COPY_FILE) --parents Process.cpp details.cpp main.cpp systemmonitor.cpp files.cpp memorymap.cpp properties.cpp FileSystem.cpp cpugraph.cpp memorygraph.cpp networkgraph.cpp resource_usage.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents systemmonitor.ui files.ui memorymap.ui properties.ui $(DISTDIR)/
+	$(COPY_FILE) --parents Process.hpp details.hpp list_proc.hpp systemmonitor.h files.h memorymap.h properties.h FileSystem.hpp cpugraph.hpp memorygraph.hpp networkgraph.hpp resource_usage.hpp usage.h $(DISTDIR)/
+	$(COPY_FILE) --parents Process.cpp details.cpp main.cpp systemmonitor.cpp files.cpp memorymap.cpp properties.cpp FileSystem.cpp cpugraph.cpp memorygraph.cpp networkgraph.cpp resource_usage.cpp usage.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents systemmonitor.ui files.ui memorymap.ui properties.ui usage.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -413,12 +419,13 @@ compiler_moc_predefs_make_all: moc_predefs.h
 compiler_moc_predefs_clean:
 	-$(DEL_FILE) moc_predefs.h
 moc_predefs.h: /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
-	g++ -pipe -O2 -std=gnu++11 -Wall -W -dM -E -o moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
+	g++ -pipe -O2 -std=gnu++11 -w -dM -E -o moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_systemmonitor.cpp moc_files.cpp moc_memorymap.cpp moc_properties.cpp moc_cpugraph.cpp moc_memorygraph.cpp moc_networkgraph.cpp
+compiler_moc_header_make_all: moc_systemmonitor.cpp moc_files.cpp moc_memorymap.cpp moc_properties.cpp moc_cpugraph.cpp moc_memorygraph.cpp moc_networkgraph.cpp moc_usage.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_systemmonitor.cpp moc_files.cpp moc_memorymap.cpp moc_properties.cpp moc_cpugraph.cpp moc_memorygraph.cpp moc_networkgraph.cpp
+	-$(DEL_FILE) moc_systemmonitor.cpp moc_files.cpp moc_memorymap.cpp moc_properties.cpp moc_cpugraph.cpp moc_memorygraph.cpp moc_networkgraph.cpp moc_usage.cpp
 moc_systemmonitor.cpp: Process.hpp \
+		FileSystem.hpp \
 		systemmonitor.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
@@ -429,7 +436,8 @@ moc_files.cpp: files.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/u/riker/u92/lhandal/cs252/lab6 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtCharts -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include files.h -o moc_files.cpp
 
-moc_memorymap.cpp: memorymap.h \
+moc_memorymap.cpp: details.hpp \
+		memorymap.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/u/riker/u92/lhandal/cs252/lab6 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtCharts -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include memorymap.h -o moc_memorymap.cpp
@@ -454,11 +462,16 @@ moc_networkgraph.cpp: networkgraph.hpp \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/u/riker/u92/lhandal/cs252/lab6 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtCharts -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include networkgraph.hpp -o moc_networkgraph.cpp
 
+moc_usage.cpp: usage.h \
+		moc_predefs.h \
+		/usr/lib/qt5/bin/moc
+	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/u/riker/u92/lhandal/cs252/lab6 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtCharts -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include usage.h -o moc_usage.cpp
+
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all: ui_systemmonitor.h ui_files.h ui_memorymap.h ui_properties.h
+compiler_uic_make_all: ui_systemmonitor.h ui_files.h ui_memorymap.h ui_properties.h ui_usage.h
 compiler_uic_clean:
-	-$(DEL_FILE) ui_systemmonitor.h ui_files.h ui_memorymap.h ui_properties.h
+	-$(DEL_FILE) ui_systemmonitor.h ui_files.h ui_memorymap.h ui_properties.h ui_usage.h
 ui_systemmonitor.h: systemmonitor.ui \
 		/usr/lib/qt5/bin/uic
 	/usr/lib/qt5/bin/uic systemmonitor.ui -o ui_systemmonitor.h
@@ -474,6 +487,10 @@ ui_memorymap.h: memorymap.ui \
 ui_properties.h: properties.ui \
 		/usr/lib/qt5/bin/uic
 	/usr/lib/qt5/bin/uic properties.ui -o ui_properties.h
+
+ui_usage.h: usage.ui \
+		/usr/lib/qt5/bin/uic
+	/usr/lib/qt5/bin/uic usage.ui -o ui_usage.h
 
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
@@ -495,6 +512,7 @@ details.o: details.cpp details.hpp \
 
 main.o: main.cpp systemmonitor.h \
 		Process.hpp \
+		FileSystem.hpp \
 		list_proc.cpp \
 		list_proc.hpp \
 		networkgraph.hpp
@@ -502,16 +520,17 @@ main.o: main.cpp systemmonitor.h \
 
 systemmonitor.o: systemmonitor.cpp systemmonitor.h \
 		Process.hpp \
+		FileSystem.hpp \
 		ui_systemmonitor.h \
 		files.h \
 		memorymap.h \
-		properties.h \
 		details.hpp \
-		FileSystem.hpp \
+		properties.h \
 		networkgraph.hpp \
 		resource_usage.hpp \
 		memorygraph.hpp \
-		cpugraph.hpp
+		cpugraph.hpp \
+		usage.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o systemmonitor.o systemmonitor.cpp
 
 files.o: files.cpp files.h \
@@ -549,6 +568,10 @@ networkgraph.o: networkgraph.cpp networkgraph.hpp \
 resource_usage.o: resource_usage.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o resource_usage.o resource_usage.cpp
 
+usage.o: usage.cpp usage.h \
+		ui_usage.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o usage.o usage.cpp
+
 moc_systemmonitor.o: moc_systemmonitor.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_systemmonitor.o moc_systemmonitor.cpp
 
@@ -569,6 +592,9 @@ moc_memorygraph.o: moc_memorygraph.cpp
 
 moc_networkgraph.o: moc_networkgraph.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_networkgraph.o moc_networkgraph.cpp
+
+moc_usage.o: moc_usage.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_usage.o moc_usage.cpp
 
 ####### Install
 

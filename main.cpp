@@ -11,7 +11,6 @@ int main(int argc, char *argv[]){
     SystemMonitor w;
     w.show();
     w.setWindowTitle("System Monitor");
-//    free_proc_map();
 
     return a.exec();
 }

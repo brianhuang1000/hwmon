@@ -4,6 +4,7 @@ QT       += charts
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
+CONFIG += warn_off
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -29,7 +30,8 @@ SOURCES += \
     cpugraph.cpp \
     memorygraph.cpp \
     networkgraph.cpp \
-    resource_usage.cpp
+    resource_usage.cpp \
+    usage.cpp
 
 HEADERS += \
     Process.hpp \
@@ -43,13 +45,15 @@ HEADERS += \
     cpugraph.hpp \
     memorygraph.hpp \
     networkgraph.hpp \
-    resource_usage.hpp
+    resource_usage.hpp \
+    usage.h
 
 FORMS += \
     systemmonitor.ui \
     files.ui \
     memorymap.ui \
-    properties.ui
+    properties.ui \
+    usage.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

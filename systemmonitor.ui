@@ -178,7 +178,7 @@
        </rect>
       </property>
       <property name="sortingEnabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="animated">
        <bool>false</bool>
@@ -237,16 +237,6 @@
    <property name="nativeMenuBar">
     <bool>false</bool>
    </property>
-   <widget class="QMenu" name="menuMonitor">
-    <property name="title">
-     <string>Monitor</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="title">
-     <string>Edit</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuResources">
     <property name="title">
      <string>View</string>
@@ -268,9 +258,8 @@
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionUsage"/>
    </widget>
-   <addaction name="menuMonitor"/>
-   <addaction name="menuEdit"/>
    <addaction name="menuResources"/>
    <addaction name="menuFile_System"/>
   </widget>
@@ -314,14 +303,9 @@
     <string>Refresh</string>
    </property>
   </action>
-  <action name="actionopppp">
+  <action name="actionUsage">
    <property name="text">
-    <string>opppp</string>
-   </property>
-  </action>
-  <action name="actionopp">
-   <property name="text">
-    <string>opp</string>
+    <string>Usage</string>
    </property>
   </action>
  </widget>

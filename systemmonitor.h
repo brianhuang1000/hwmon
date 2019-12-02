@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include "Process.hpp"
+#include "FileSystem.hpp"
 
 typedef struct process_struct{
     std::string name;
@@ -58,6 +59,8 @@ private slots:
     void process_prop();
 
     void on_actionRefresh_triggered();
+
+    void on_actionUsage_triggered();
 
 private:
     Ui::SystemMonitor *ui;

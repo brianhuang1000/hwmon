@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+#include "details.hpp"
+
 namespace Ui {
 class MemoryMap;
 }
@@ -14,6 +16,10 @@ class MemoryMap : public QDialog
 public:
     explicit MemoryMap(QWidget *parent = 0);
     ~MemoryMap();
+
+    void mm_label(QString name, QString pid);
+
+    void mm_files(mem_read mem);
 
 private:
     Ui::MemoryMap *ui;
