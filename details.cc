@@ -111,7 +111,7 @@ std::string ms_to_time(unsigned long jiffies) {
 std::string get_stamp(unsigned long long epoch) {
   std::ifstream infile;
   infile.open("/proc/stat");
-  unsigned long long btime;
+  unsigned long long btime = 0;
   if (infile.is_open()) {
     std::string line;
     while (std::getline(infile, line)) {
@@ -147,11 +147,11 @@ proc_prop details(int pid) {
   if (infile.is_open()) {
     std::string line;
     int got = 0;
-    unsigned long rss;
-    unsigned long swap;
-    unsigned long rss_file;
-    unsigned long rssshmem;
-    unsigned long long start_time;
+    unsigned long rss = 0;
+    unsigned long swap = 0;
+    unsigned long rss_file = 0;
+    unsigned long rssshmem = 0;
+    unsigned long long start_time = 0;
     while ((std::getline(infile, line)) || (got < 8)) {
       std::istringstream iss(line);
       std::string key;
@@ -191,6 +191,7 @@ proc_prop details(int pid) {
         got++;
       }
     }
+    ret.res_mem = rss;
     infile.close();
     FILE *f = fopen(("/proc/" + std::to_string(pid) + "/stat").c_str(), "r");
       if (f != NULL) {

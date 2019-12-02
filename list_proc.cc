@@ -260,8 +260,11 @@ std::list<fds> openfiles(int pid) {
         fds temp;
         // int number = std::stoi(name);
         char dets[64] = "";
-        readlink(("/proc/" + std::to_string(pid) + "/fd/" + name).c_str(),
+        int rlret = readlink(("/proc/" + std::to_string(pid) + "/fd/" + name).c_str(),
                   dets, 64);
+        if (rlret == -1) {
+          continue;
+        }
         if (strstr(dets, ":[") != NULL){
           char *blep = strtok(dets, ":[");
           char *bloop = strtok(NULL, "");
@@ -274,6 +277,7 @@ std::list<fds> openfiles(int pid) {
           temp.type = "file";
           temp.loc = dets;
         }
+        out.push_back(temp);
         // std::cout << number << ", " << temp.type << ", ";
         // std::cout << temp.loc << std::endl;
       }
