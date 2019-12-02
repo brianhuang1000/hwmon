@@ -54,5 +54,5 @@ see the [tags on this repository](https://github.com/your/project/tags).
 ## Authors
 
 * **Bryan Huang** - *Processes* - [bryanhuang1000](https://github.com/bryanhuang1000)
-* **Alan Libby** - *Graphs and File system* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Alan Libby** - *Graphs and File system* - [libbya](https://github.com/libbya)
 * **Lucianop Handal** - *System information and front end* - [lhandalb](https://github.com/lhandalb)
