@@ -193,10 +193,17 @@ proc_prop details(int pid) {
     }
     infile.close();
     FILE *f = fopen(("/proc/" + std::to_string(pid) + "/stat").c_str(), "r");
-    if (f != NULL) {
-      int items = fscanf(f,"%*d %*[^)] %*c %*c %*d %*d %*d %*d %*d %*d %*d "
+      if (f != NULL) {
+        char junk[255] = " ";
+      while (strstr(junk,")") == NULL) {
+        if(fscanf(f,"%[^ ]%*c",junk) ==  EOF){
+          break;
+        }
+      }
+      int items = fscanf(f,"%*c %*d %*d %*d %*d %*d %*d %*d "
             "%*d %*d %*d %*d %*d %*d %*d %*d %d %*d %*d %llu",
             &(ret.nice), &start_time);
+      std::cout << ret.nice << " " << start_time << std::endl;
       if (items != 2) {
         std::cout << "details: error reading file\n";
         ret.cpu = 0;
@@ -248,7 +255,7 @@ void printdetails(proc_prop details) {
  */
 
 // int main(int argc, const char** argv) {
-//   proc_prop aaaahhhhhh = details(3766);
+//   proc_prop aaaahhhhhh = details(2629);
 //   printdetails(aaaahhhhhh);
 //   // std::list<mem_read> wish90 = mem_map(3254);
 //   // print_list(wish90);

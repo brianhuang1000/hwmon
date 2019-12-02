@@ -7,22 +7,22 @@ std::map<int, Process *> g_proc_map;
  * Testing main function
  */
 
-int main(int argc, const char** argv) {
-  //openfiles(3157);
-  if (argc != 2){
-    std::cout << "usage: ./proc username\n";
-    return -1;
-  }
-  int userid = get_uid(argv[1]);
-  populate();
-  set_parents();
-  get_cpu(get_nprocs_conf());
-  update();
-  update();
-  update();
-  print_tree(userid);
-  free_proc_map();
-}
+// int main(int argc, const char** argv) {
+//   //openfiles(3157);
+//   if (argc != 2){
+//     std::cout << "usage: ./proc username\n";
+//     return -1;
+//   }
+//   int userid = get_uid(argv[1]);
+//   populate();
+//   set_parents();
+//   get_cpu(get_nprocs_conf());
+//   update();
+//   update();
+//   update();
+//   print_tree(userid);
+//   free_proc_map();
+// }
 
 /*
  * Populates g_proc_map with directories of processes and g_parents list
