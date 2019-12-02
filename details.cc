@@ -205,6 +205,7 @@ proc_prop details(int pid) {
             &(ret.nice), &start_time);
       if (items != 2) {
         std::cout << "details: error reading file\n";
+        ret.nice = 0;
         ret.cpu = 0;
         ret.uptime = "0";
         ret.id = 0;
@@ -228,10 +229,36 @@ proc_prop details(int pid) {
       ret.started = get_stamp(start_time / sysconf(_SC_CLK_TCK));
       fclose(f);
     } else {
+      ret.user = " ";
+      ret.status = " ";
+      ret.name = " ";
+      ret.uptime = "0";
+      ret.id = 0;
+      ret.cpu = 0.0;
+      ret.memory = 0;
+      ret.v_mem = 0;
+      ret.res_mem = 0;
+      ret.sh_mem = 0;
+      ret.started = "0";
+      ret.nice = 0;
+      ret.id = 0;
       std::cout << "cpu open fail\n";
       return ret;
     }
   } else {
+    ret.user = " ";
+    ret.status = " ";
+    ret.name = " ";
+    ret.uptime = "0";
+    ret.id = 0;
+    ret.cpu = 0.0;
+    ret.memory = 0;
+    ret.v_mem = 0;
+    ret.res_mem = 0;
+    ret.sh_mem = 0;
+    ret.started = "0";
+    ret.nice = 0;
+    ret.id = 0;
     std::cout << "details: error opening file\n";
     return ret;
   }
