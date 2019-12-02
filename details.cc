@@ -14,6 +14,10 @@ std::list<mem_read> mem_map(int pid) {
       mem_read temp;
       std::string title;
       std::getline(infile, title);
+      if(infile.eof()) {
+        break;
+      }
+      //std::cout <<":"<<title<<":" <<std::endl;
       temp.start = title.substr(0, title.find("-"));
       title.erase(0, title.find("-") + 1);
       std::istringstream is_line(title);
@@ -35,7 +39,7 @@ std::list<mem_read> mem_map(int pid) {
         rval >> value;
         key.pop_back();
         if (key.compare("VmFlags") == 0) {
-          std::getline(infile, line);
+          //std::getline(infile, line);
           next_part = false;
         }
         if (!key.compare("Size")) {
@@ -152,7 +156,8 @@ proc_prop details(int pid) {
     unsigned long rss_file = 0;
     unsigned long rssshmem = 0;
     unsigned long long start_time = 0;
-    while ((std::getline(infile, line)) || (got < 8)) {
+    while ((infile.eof()) || (got < 8)) {
+      std::getline(infile, line);
       std::istringstream iss(line);
       std::string key;
       std::string value;
@@ -281,10 +286,9 @@ void printdetails(proc_prop details) {
  * Sample main for debugging
  */
 
-// int main(int argc, const char** argv) {
-//   proc_prop aaaahhhhhh = details(2629);
-//   printdetails(aaaahhhhhh);
-//   // std::list<mem_read> wish90 = mem_map(3254);
-//   // print_list(wish90);
-//   //free_list(wish90);
-// }
+int main(int argc, const char** argv) {
+  //proc_prop aaaahhhhhh = details(2629);
+  //printdetails(aaaahhhhhh);
+  std::list<mem_read> wish90 = mem_map(2629);
+  print_list(wish90);
+}
