@@ -166,11 +166,11 @@ unsigned long cpu_time() {
       return 100;
     }
     for (int i = 0; i < 10; i++) {
-      std::cout << cpus[i] << " ";
+      //std::cout << cpus[i] << " ";
       total += cpus[i];
     }
-    std::cout << std::endl;
-    std::cout << "global cpu: " << total << std::endl;
+    //std::cout << std::endl;
+    //std::cout << "global cpu: " << total << std::endl;
     fclose(f);
   } else {
     std::cout << "Error getting cpu jiffies\n";

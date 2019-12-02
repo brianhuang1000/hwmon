@@ -203,7 +203,6 @@ proc_prop details(int pid) {
       int items = fscanf(f,"%*c %*d %*d %*d %*d %*d %*d %*d "
             "%*d %*d %*d %*d %*d %*d %*d %*d %d %*d %*d %llu",
             &(ret.nice), &start_time);
-      std::cout << ret.nice << " " << start_time << std::endl;
       if (items != 2) {
         std::cout << "details: error reading file\n";
         ret.cpu = 0;
