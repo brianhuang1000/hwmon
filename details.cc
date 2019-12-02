@@ -204,7 +204,7 @@ proc_prop details(int pid) {
         ret.id = 0;
         ret.memory = 0;
         ret.sh_mem = 0;
-        ret.started = 0;
+        ret.started = "0";
         return ret;
       }
       unsigned long procstart = pid_time(std::to_string(pid));
