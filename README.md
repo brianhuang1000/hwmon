@@ -5,7 +5,7 @@ provides a graphical representation about resource consumption.
 
 ### Prerequisites
 
-HWMon needs a linux enviorment, qt standard and graphs libraries and C++
+HWMon needs a linux environment, qt standard and graphs libraries and C++
 standard libraries and a compiler.
 
 ### Installing
@@ -46,13 +46,8 @@ File System tab:
   the file system tab provides the memory total, free, available, used of the
   computer file systems.
 
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available,
-see the [tags on this repository](https://github.com/your/project/tags).
-
 ## Authors
 
 * **Bryan Huang** - *Processes* - [bryanhuang1000](https://github.com/bryanhuang1000)
 * **Alan Libby** - *Graphs and File system* - [libbya](https://github.com/libbya)
-* **Lucianop Handal** - *System information and front end* - [lhandalb](https://github.com/lhandalb)
+* **Luciano Handal** - *System information and frontend* - [lhandalb](https://github.com/lhandalb)

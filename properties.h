@@ -15,6 +15,10 @@ public:
     explicit properties(QWidget *parent = 0);
     ~properties();
 
+    void p_label(QString name, QString pid);
+
+    void p_details(pid_t pid);
+
 private:
     Ui::properties *ui;
 };

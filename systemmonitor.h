@@ -34,6 +34,27 @@ public:
 
     void add_process(QTreeWidgetItem *parent, process *proc);
 
+    QString storage_to_str(double size);
+
+    void add_device(FileSystem dev);
+
+    void add_process(QTreeWidgetItem *parent, Process *proc);
+
+    void update_screen();
+
+    void populate_devides();
+
+    void populate_processes();
+
+    void add_system_info();
+
+    void set_up_graphs();
+
+    pid_t get_pid(QTreeWidgetItem *item);
+
+    void process_update();
+
+
 private slots:
     void on_actionActive_processes_triggered();
 
