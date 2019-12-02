@@ -1,6 +1,10 @@
 #include "details.hpp"
 #include "list_proc.hpp"
 
+/*
+ * Returns a list of mem_read of the memory map (read from smaps) of the process
+ */
+
 std::list<mem_read> mem_map(int pid) {
   std::list<mem_read> ret;
   std::ifstream infile;
@@ -10,6 +14,9 @@ std::list<mem_read> mem_map(int pid) {
       mem_read temp;
       std::string title;
       std::getline(infile, title);
+      if(infile.eof()) {
+        break;
+      }
       temp.start = title.substr(0, title.find("-"));
       title.erase(0, title.find("-") + 1);
       std::istringstream is_line(title);
@@ -31,34 +38,32 @@ std::list<mem_read> mem_map(int pid) {
         rval >> value;
         key.pop_back();
         if (key.compare("VmFlags") == 0) {
-          std::getline(infile, line);
           next_part = false;
         }
         if (!key.compare("Size")) {
           temp.size = std::stoi(value, 0);
-        }
-        else if (!key.compare("Shared_Clean")) {
+        } else if (!key.compare("Shared_Clean")) {
           temp.s_clean = std::stoi(value, 0);
-        }
-        else if (!key.compare("Shared_Dirty")) {
+        } else if (!key.compare("Shared_Dirty")) {
           temp.s_dirty = std::stoi(value, 0);
-        }
-        else if (!key.compare("Private_Clean")) {
+        } else if (!key.compare("Private_Clean")) {
           temp.p_clean = std::stoi(value, 0);
-        }
-        else if (!key.compare("Private_Dirty")) {
+        } else if (!key.compare("Private_Dirty")) {
           temp.p_dirty = std::stoi(value, 0);
         }
       }
       ret.push_back(temp);
     }
-  }
-  else {
-    std::cout << "does not work\n";
+  } else {
+    std::cout << "Unable to open file for memory map\n";
   }
   infile.close();
   return ret;
 }
+
+/*
+ * Prints mem_read list for debugging
+ */
 
 void print_list(std::list<mem_read> arteam) {
   int number = 0;
@@ -66,21 +71,31 @@ void print_list(std::list<mem_read> arteam) {
     if (it->path == "") {
       std::cout << "n/a";
     }
-    std::cout << it->path << ", " << it->start << ", " << it->end;
-    std::cout << ", " << it->perms << ", " << it->offset << ", " << it->size << "kB, ";
-    std::cout << it->s_clean + it->s_dirty << ", " << it->p_clean + it->p_dirty << std::endl;
-    number ++;
+    std::cout << it->path << ", " << it->start << ", " << it->end << ", ";
+    std::cout << it->perms << ", " << it->offset << ", " << it->size << "kB, ";
+    std::cout << it->s_clean + it->s_dirty << ", " << it->p_clean + it->p_dirty;
+    std::cout << std::endl;
+    number++;
   }
   std::cout << "lines: " << number << std::endl;
 }
 
+/*
+ * Frees mem_read list
+ */
+
 void free_list(std::list<mem_read *> wish90) {
-  for (auto it = wish90.cbegin(), next_it = it; it != wish90.cend(); it = next_it) {
+  for (auto it = wish90.cbegin(), next_it = it;
+        it != wish90.cend(); it = next_it) {
     ++next_it;
     free(*it);
     wish90.erase(it);
   }
 }
+
+/*
+ * Converts jiffies to HH:MM:SS
+ */
 
 std::string ms_to_time(unsigned long jiffies) {
   int seconds = (jiffies / sysconf(_SC_CLK_TCK));
@@ -91,10 +106,14 @@ std::string ms_to_time(unsigned long jiffies) {
   return temp;
 }
 
+/*
+ * Converts epoch seconds to time_stamp
+ */
+
 std::string get_stamp(unsigned long long epoch) {
   std::ifstream infile;
   infile.open("/proc/stat");
-  unsigned long long btime;
+  unsigned long long btime = 0;
   if (infile.is_open()) {
     std::string line;
     while (std::getline(infile, line)) {
@@ -116,8 +135,12 @@ std::string get_stamp(unsigned long long epoch) {
   } else {
     return "boot time not found";
   }
-  return "error";
+  return "get_stamp error";
 }
+
+/*
+ * Returns proc_prop of given pid
+ */
 
 proc_prop details(int pid) {
   proc_prop ret;
@@ -126,12 +149,13 @@ proc_prop details(int pid) {
   if (infile.is_open()) {
     std::string line;
     int got = 0;
-    unsigned long rss;
-    unsigned long swap;
-    unsigned long rss_file;
-    unsigned long rssshmem;
-    unsigned long long start_time;
-    while (std::getline(infile, line) || got < 8) {
+    unsigned long rss = 0;
+    unsigned long swap = 0;
+    unsigned long rss_file = 0;
+    unsigned long rssshmem = 0;
+    unsigned long long start_time = 0;
+    while ((infile.eof()) || (got < 8)) {
+      std::getline(infile, line);
       std::istringstream iss(line);
       std::string key;
       std::string value;
@@ -145,7 +169,8 @@ proc_prop details(int pid) {
         got++;
       } else if (!key.compare("Uid")) {
         int userid = stoi(value);
-        std::string temp = string_uid(userid) + "(" + std::to_string(userid) + ")";
+        std::string temp = string_uid(userid) + "(" +
+                            std::to_string(userid) + ")";
         ret.user = temp;
         got++;
       } else if (!key.compare("State")) {
@@ -169,20 +194,38 @@ proc_prop details(int pid) {
         got++;
       }
     }
+    ret.res_mem = rss;
     infile.close();
     FILE *f = fopen(("/proc/" + std::to_string(pid) + "/stat").c_str(), "r");
-    if (f != NULL) {
-      fscanf(f,"%*d %*[^)] %*c %*c %*d %*d %*d %*d %*d %*d %*d "
+      if (f != NULL) {
+        char junk[255] = " ";
+      while (strstr(junk,")") == NULL) {
+        if(fscanf(f,"%[^ ]%*c",junk) ==  EOF){
+          break;
+        }
+      }
+      int items = fscanf(f,"%*c %*d %*d %*d %*d %*d %*d %*d "
             "%*d %*d %*d %*d %*d %*d %*d %*d %d %*d %*d %llu",
             &(ret.nice), &start_time);
+      if (items != 2) {
+        std::cout << "details: error reading file\n";
+        ret.nice = 0;
+        ret.cpu = 0;
+        ret.uptime = "0";
+        ret.id = 0;
+        ret.memory = 0;
+        ret.sh_mem = 0;
+        ret.started = "0";
+        return ret;
+      }
       unsigned long procstart = pid_time(std::to_string(pid));
       unsigned long cpu_start = cpu_time();
       std::this_thread::sleep_for(std::chrono::milliseconds(1000));
       unsigned long cpu_end = cpu_time();
       unsigned long procend = pid_time(std::to_string(pid));
       int cpus = get_nprocs_conf();
-      ret.cpu = ((float)100 * (float)(procend - procstart) / (float)(cpu_end - cpu_start))
-                  * cpus;
+      ret.cpu = ((float)100 * (float)(procend - procstart) /
+                  (float)(cpu_end - cpu_start)) * cpus;
       ret.uptime = ms_to_time(procend);
       ret.id = pid;
       ret.memory = rss + swap;
@@ -190,18 +233,51 @@ proc_prop details(int pid) {
       ret.started = get_stamp(start_time / sysconf(_SC_CLK_TCK));
       fclose(f);
     } else {
+      ret.user = " ";
+      ret.status = " ";
+      ret.name = " ";
+      ret.uptime = "0";
+      ret.id = 0;
+      ret.cpu = 0.0;
+      ret.memory = 0;
+      ret.v_mem = 0;
+      ret.res_mem = 0;
+      ret.sh_mem = 0;
+      ret.started = "0";
+      ret.nice = 0;
+      ret.id = 0;
       std::cout << "cpu open fail\n";
       return ret;
     }
   } else {
+    ret.user = " ";
+    ret.status = " ";
+    ret.name = " ";
+    ret.uptime = "0";
+    ret.id = 0;
+    ret.cpu = 0.0;
+    ret.memory = 0;
+    ret.v_mem = 0;
+    ret.res_mem = 0;
+    ret.sh_mem = 0;
+    ret.started = "0";
+    ret.nice = 0;
+    ret.id = 0;
+    std::cout << "details: error opening file\n";
     return ret;
   }
   return ret;
 }
 
+/*
+ * Prints proc details for debugging
+ */
+
 void printdetails(proc_prop details) {
-  std::cout << details.name << " " << details.id << " " << details.user << " " << details.status
-            << " " << details.memory << " " << details.sh_mem << " " << details.cpu << " "
-            << details.uptime << " " << details.started << " " << details.nice << std::endl;
+  std::cout << details.name << " " << details.id << " " << details.user << " "
+            << details.status << " " << details.memory << " " << details.sh_mem
+            << " " << details.cpu << " " << details.uptime << " "
+            << details.started << " " << details.nice << std::endl;
 }
+
 

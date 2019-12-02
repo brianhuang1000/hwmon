@@ -49,4 +49,6 @@ void free_list(std::list<mem_read *> wish90);
 void print_list(std::list<mem_read> arteam);
 std::list<mem_read> mem_map(int pid);
 
+void printdetails(proc_prop details);
+
 #endif // DETAILS_HPP
