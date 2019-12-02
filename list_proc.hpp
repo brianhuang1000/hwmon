@@ -1,6 +1,3 @@
-#ifndef LIST_PROC_HPP
-#define LIST_PROC_HPP
-
 #include <iostream>
 #include <map>
 #include <string>
@@ -9,10 +6,25 @@
 #include <dirent.h>
 #include <string.h>
 #include <sys/dir.h>
-
+#include <unistd.h>
 #include <sys/sysinfo.h>
+#include <thread>
 
 #include "Process.hpp"
+
+#define CPU_DIFF (1000)
+
+struct _tree{
+  int id;
+  struct _process *parent;
+  std::list<struct _process *> children;
+};
+
+struct _fds {
+  int number;
+  std::string type;
+  std::string loc;
+} typedef fds;
 
 void print_list();
 int populate();
@@ -25,11 +37,4 @@ bool set_parents();
 void update();
 unsigned long pid_time(std::string pid);
 unsigned long cpu_time();
-
-struct _tree{
-  int id;
-  struct _process *parent;
-  std::list<struct _process *> children;
-};
-
-#endif // LIST_PROC_HPP
+std::list<fds> openfiles(int pid);

@@ -1,5 +1,6 @@
 #include "files.h"
 #include "ui_files.h"
+#include "list_proc.hpp"
 
 #include <QBoxLayout>
 #include <iostream>
@@ -16,8 +17,11 @@ files::files(QWidget *parent) :
     ui->setupUi(this);
     ui->files_tree->header()->resizeSection(0, 64);
 }
-void files_label(QString name, QString pid){
-    QString buff = "Files opened by process \"";
+void files_label(QString name, QString pid, bool fds){
+    QString buff = "No files opened by process \"";
+    if (fds){
+        buff = "Files opened by process \"";
+    }
     buff.append(name);
     buff.append("\" (PID ");
     buff.append(pid);
@@ -25,13 +29,18 @@ void files_label(QString name, QString pid){
     g_ui_files->label->setText(buff);
 }
 
-void files_files(){
+bool files_files(pid_t pid){
     QTreeWidget * tree = g_ui_files->files_tree;
-    QTreeWidgetItem *item = new QTreeWidgetItem();
-    item->setText(0, QString::fromStdString("FD"));
-    item->setText(1, "Type");
-    item->setText(2, "object");
-    tree->addTopLevelItem(item);
+    std::list<fds>fd_list = openfiles(pid);
+    std::list<fds>::iterator it;
+    for (it = fd_list.begin(); it != fd_list.end(); it++) {
+        QTreeWidgetItem *item = new QTreeWidgetItem();
+        item->setText(0, QString::number(it->number));
+        item->setText(1, QString::fromStdString(it->type));
+        item->setText(2, QString::fromStdString(it->loc));
+        tree->addTopLevelItem(item);
+    }
+    return !fd_list.empty();
 }
 
 

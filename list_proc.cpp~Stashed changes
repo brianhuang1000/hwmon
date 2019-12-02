@@ -258,7 +258,7 @@ std::list<fds> openfiles(int pid) {
       std::string name(ent->d_name);
       if(name.find_first_not_of("0123456789") == std::string::npos) {
         fds temp;
-        temp.number = std::stoi(name);
+        // int number = std::stoi(name);
         char dets[64] = "";
         int rlret = readlink(("/proc/" + std::to_string(pid) + "/fd/" + name).c_str(),
                   dets, 64);

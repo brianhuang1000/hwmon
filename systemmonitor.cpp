@@ -30,13 +30,13 @@ extern int populate();
 extern std::vector<FileSystem> get_fs_list();
 extern bool set_parents();
 extern void update();
-extern void files_label(QString name, QString pid);
-extern void files_files();
+extern void files_label(QString name, QString pid, bool fds);
+extern bool files_files(pid_t pid);
 extern void mm_label(QString name, QString pid);
 extern void mm_files(mem_read mem);
 extern std::list<mem_read> mem_map(int pid);
 extern void p_label(QString name, QString pid);
-extern void p_details(pid_t);
+extern void p_details(pid_t pid);
 extern void free_proc_map();
 
 char g_mode = 'a';
@@ -49,13 +49,11 @@ int g_current_col;
 QString storage_to_str(double size){
     char buff[1024];
     if(size < 1024){
-        sprintf(buff, "%.1lf B", size);
+        sprintf(buff, "%.1lf KiB", size);
     } else if (size < pow(1024, 2)){
-        sprintf(buff, "%.1lf KiB", size / 1024);
-    } else if (size < pow(1024, 3)){
-        sprintf(buff, "%.1lf MiB", size / pow(1024, 2));
+        sprintf(buff, "%.1lf MiB", size / 1024);
     } else {
-        sprintf(buff, "%.1lf GiB", size / pow(1024, 3));
+        sprintf(buff, "%.1lf GiB", size / pow(1024, 2));
     }
     std::string str = buff;
     QString qstr = QString::fromStdString(str);
@@ -188,7 +186,7 @@ void add_system_info(){
     if(sysinfo(&hardware)){
         info.append("Error retrieving total RAM\n");
     } else {
-        info.append(storage_to_str(hardware.totalram));
+        info.append(storage_to_str(hardware.totalram  / 1024.00));
     }
 
     std::ifstream cpuinfo("/proc/cpuinfo");
@@ -211,7 +209,7 @@ void add_system_info(){
         info.append("Error retrieving available storage\n");
     } else {
         info.append("Available space disk: ");
-        info.append(storage_to_str(disk.f_bavail * disk.f_blocks));
+        info.append(storage_to_str(disk.f_bavail * disk.f_blocks / 1024.00));
     }
 
 
@@ -283,6 +281,7 @@ pid_t get_pid(QTreeWidgetItem *item){
 }
 void process_update(){
     update();
+    populate_processes();
     update_screen();
 }
 
@@ -296,7 +295,7 @@ void SystemMonitor::continue_process(){
 }
 
 void SystemMonitor::end_process(){
-    kill(get_pid(g_current_item), SIGKILL);
+    kill(get_pid(g_current_item), SIGQUIT);
     process_update();
 }
 
@@ -327,8 +326,7 @@ void SystemMonitor::open_file(){
     files f;
     f.setModal(true);
     f.setWindowTitle("Open Files");
-    files_label(g_current_item->text(0), g_current_item->text(3));
-    files_files();
+    files_label(g_current_item->text(0), g_current_item->text(3), files_files(get_pid(g_current_item)));
     f.exec();
 }
 

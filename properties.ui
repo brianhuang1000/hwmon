@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>670</width>
-    <height>545</height>
+    <width>661</width>
+    <height>420</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>570</x>
-     <y>510</y>
+     <y>380</y>
      <width>91</width>
      <height>32</height>
     </rect>
@@ -48,7 +48,7 @@
      <x>10</x>
      <y>30</y>
      <width>651</width>
-     <height>481</height>
+     <height>351</height>
     </rect>
    </property>
    <attribute name="horizontalHeaderDefaultSectionSize">
@@ -86,17 +86,7 @@
    </row>
    <row>
     <property name="text">
-     <string>Writable Memory</string>
-    </property>
-   </row>
-   <row>
-    <property name="text">
      <string>Shared Memory</string>
-    </property>
-   </row>
-   <row>
-    <property name="text">
-     <string>X Server Memory</string>
     </property>
    </row>
    <row>
@@ -111,42 +101,12 @@
    </row>
    <row>
     <property name="text">
-     <string>ID</string>
-    </property>
-   </row>
-   <row>
-    <property name="text">
      <string>Started</string>
     </property>
    </row>
    <row>
     <property name="text">
-     <string>Nice</string>
-    </property>
-   </row>
-   <row>
-    <property name="text">
-     <string>Priority</string>
-    </property>
-   </row>
-   <row>
-    <property name="text">
-     <string>Security Context</string>
-    </property>
-   </row>
-   <row>
-    <property name="text">
-     <string>Command Line</string>
-    </property>
-   </row>
-   <row>
-    <property name="text">
-     <string>Waiting Channel</string>
-    </property>
-   </row>
-   <row>
-    <property name="text">
-     <string>Control Group</string>
+     <string>ID</string>
     </property>
    </row>
    <column>
